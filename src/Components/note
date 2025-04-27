@@ -1,0 +1,51 @@
+back to home in card
+place holder images
+https://codepen.io/GreenSock/details/bGPBpeY
+
+            // Fade out the entire container on scroll
+            // gsap.to(introRef.current, {
+            //     autoAlpha: 0,
+            //     duration: 1,
+            //     ease: 'expo.in',
+            //     scrollTrigger: {
+            //         trigger: containerRef.current,
+            //         start: 'top top',
+            //         scrub: true,
+            //         pin: true,
+            //         anticipatePin: true,
+            //         invalidateOnRefresh: true,
+            //         onUpdate: (self) => {
+            //             const pinSpacer = containerRef.current.parentElement;
+            //             if (pinSpacer && pinSpacer.classList.contains('pin-spacer')) {
+            //                 pinSpacer.style.backgroundColor = 'black';
+            //                 pinSpacer.style.margin = '0';
+            //                 pinSpacer.style.padding = '0';
+            //                 pinSpacer.style.width = '100%';
+            //                 pinSpacer.style.boxSizing = 'border-box';
+            //             }
+            //         }
+            //     },
+            // });
+
+            // const images = contentRef.current.querySelectorAll(`.${styles.imageContent}`);
+            // images.forEach((img, index) => {
+            //   if (index === 0) return; 
+            //   gsap.fromTo(img, 
+
+            //     { opacity: 1, scale: 1 },
+            //     {
+            //       opacity: 0,
+            //       scale: 1.5,
+            //       ease: 'power2.out',
+            //       scrollTrigger: {
+            //         trigger: contentRef.current,
+            //         start: `top+=${index * 100}% top`,
+            //         end: `top+=${(index + 1) * 100}% top`,
+            //         scrub: 1,
+            //         pin:true,
+            //         markers:true,
+            //         invalidateOnRefresh: true,
+            //       },
+            //     }
+            //   );
+            // });

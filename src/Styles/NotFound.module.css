@@ -1,0 +1,50 @@
+ 
+@font-face {
+    font-family: "decorya";
+    src: url("/public/fonts/decorya/Decorya.ttf") format("truetype");
+}
+
+.container {
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+.notf {
+    display: flex;
+    flex-direction: column;  
+    justify-content: center;
+    align-items: center;
+    font-family: "decorya", 'Times New Roman', Times, serif;
+    font-size: clamp(2rem, 1.429rem + 2.857vw, 4rem);
+   
+}
+
+.explanation{
+   font-size: clamp(0.8rem, 0.714rem + 0.429vw, 1.1rem);
+   text-align: center;
+   font-family: "decorya", 'Times New Roman', Times, serif;
+}
+
+.goMain{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: "decorya", 'Times New Roman', Times, serif;
+   
+    
+}
+
+.goMain a { 
+    color: #000000;
+    font-size: 1.2rem;
+    font-weight: 500;
+}

@@ -1,0 +1,246 @@
+@font-face {
+  font-family: 'Kabur';  
+  src: url('/public/fonts/Kabur/Kabur.ttf') format('truetype');
+}
+
+.brand {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+  color: white;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.5rem;
+  z-index: 100;
+  text-shadow: 1px 1px 5px black;
+}
+
+.itinerary {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+  text-align: left;
+  color: white;
+  font-family: "Bebas Neue", sans-serif;
+  z-index: 100;
+  text-shadow: 1px 1px 5px black;
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  display: inline-block;
+  letter-spacing: 0.1rem;
+}
+
+.next {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  padding: 1rem;
+  text-align: right;
+  color: white;
+  font-family: "Bebas Neue", sans-serif;
+  z-index: 100;
+  text-shadow: 1px 1px 5px black;
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  display: inline-block;
+  letter-spacing: 0.1rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  background: #000;
+  overscroll-behavior-y: contain;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  touch-action: pan-y; /* Ensure touch scrolling works */
+}
+
+.mainImage,
+.imageContainer,
+.infoSlide {
+  position: relative;
+  width: 100vw;
+  height: 100vh; /* Ensure at least viewport height */
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always; /* Force snap to stop at each section */
+}
+
+.image1,
+.virus {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  object-position: center center;
+}
+
+.intro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.display {
+  text-align: center;
+  color: white;
+  padding: 1rem;
+}
+
+.countryRegion {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.country {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(1rem, 0.643rem + 1.786vw, 1.5rem);
+  letter-spacing: 0.2rem;
+}
+
+.region {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(1rem, 0.643rem + 1.786vw, 1.5rem);
+  opacity: 1;
+}
+
+.placeName {
+  font-family: "Kabur", sans-serif;
+  font-size: clamp(2.5rem, 2.144rem + 1.778vw, 3rem);
+  margin: 0.5rem 0;
+}
+
+.error {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.5rem;
+  background: #000;
+  text-shadow: 1px 1px 5px black;
+  text-align: center;
+  padding: 1rem;
+  z-index: 200;
+}
+
+.infoSlide {
+  background-color: whitesmoke;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow:hidden;
+}
+
+.infoContent {
+  text-align: center;
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  gap:2.5rem;
+}
+
+.infoTitle {
+  font-family: "jost", sans-serif;
+  font-weight: 300;
+  font-size: clamp(1rem, 0.929rem + 0.357vw, 1.1rem);
+}
+
+.infoListContainer{
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+.infoList {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  margin-bottom: 2rem;
+
+}
+
+.infoItem {
+  font-family: "jost", sans-serif;
+  font-size: clamp(0.6rem, 0.457rem + 0.714vw, 0.8rem);/*0.6*/
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icons {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.iconsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.icon {
+  font-size: 1.8rem;
+}
+
+.iconText {
+  font-size: clamp(0.4rem, 0.257rem + 0.714vw, 0.6rem);/**/
+  font-weight: 300;
+  font-family: "jost", sans-serif;
+}
+
+@media (max-width: 768px) {
+  .container {
+    scroll-snap-type: y mandatory;
+  }
+  .mainImage,
+  .imageContainer,
+  .infoSlide {
+    min-height: 100vh;
+  }
+  .image1,
+  .virus {
+    opacity: 1;
+    transform: none;
+  }
+}

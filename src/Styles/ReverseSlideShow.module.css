@@ -1,0 +1,129 @@
+
+.container{
+    position: relative;
+    top:0;
+    left:0;
+    min-width: 100%;
+    min-height: max-content;
+    overflow-x:hidden;
+    /* background-color: cadetblue; */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+
+.slideShow {
+    position: relative;
+    width: 100%;
+    min-width: fit-content;
+     display: flex;
+    overflow-x: hidden;
+    gap: 10rem;
+    padding-left: clamp(1rem, 0.143rem + 4.286vw, 4rem);
+    padding-right:clamp(1rem, 0.143rem + 4.286vw, 4rem);
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* background-color: #00000034; */
+    
+
+}
+
+
+  
+
+.imageContainer {
+    flex: 0 0 auto;
+    position: relative;
+    scroll-snap-align: center;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.imageContainer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4));
+    z-index: 1;
+  }
+
+  .imageContainer::after {
+    content: attr(data-caption);
+    position: absolute;
+    font-family: "Cormorant", serif;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    font-size: 1.2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+  }
+  
+
+  .slideShowImages {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    position: relative;
+    z-index: 0;
+  }
+
+  @media (max-width: 350px) {
+
+    .imageContainer {
+      width: 300px;
+      height: 160px; 
+    }
+  
+    .imageContainer::after {
+      font-size: 1rem;
+    }
+  }
+
+ @media (min-width: 351px) {
+
+    .imageContainer {
+      width: 380px;
+      height: 240px; 
+    }
+  
+    .imageContainer::after {
+      font-size: 0.7rem;
+    }
+  }
+  
+  @media (min-width: 601px) and (max-width: 1024px) {
+    .imageContainer {
+      width: 750px; 
+      height: 533px; 
+    }
+  }
+ 
+  @media (min-width: 1024px) and (max-width: 1440px) {
+    .imageContainer {
+      width: 1200px;
+      height: 800px; 
+    }
+  }
+
+   @media (min-width: 1440px) {
+    
+
+    .imageContainer {
+      width: 1400px;
+      height: 680px; 
+    }
+  }

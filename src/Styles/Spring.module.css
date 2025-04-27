@@ -1,0 +1,125 @@
+.container {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #A2A695;
+    overflow: hidden;
+  }
+  
+  .sectionName {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    font-size: 5rem;
+    color: #4B5237;
+    text-align: center;
+    font-family: "Julius Sans One", sans-serif;
+    cursor: default;
+  }
+  .char {
+    display: inline-block;
+  }
+
+  .sandwich{
+    position:relative;
+    width: 100%;
+    min-height: 100vh;
+
+  }
+  .grid{
+    position: relative;
+    display: grid;
+    margin: 0 auto;
+    grid-template-columns: 30% 70%;
+    gap: 5rem;
+    width: 80%;
+    height: auto;
+    padding-bottom: 1rem;
+  }
+
+  .imageinfo {
+    position: relative;
+    width: 100%;
+    border-top: 1px solid #4B5237;
+    transition: all 1s ease-in-out;
+    &:hover {
+      border-top: 1px solid #4B5237;
+      box-shadow: 0px 0px 15px #868a7c;
+      transition: all 1s ease-in-out;
+      border-radius: 1rem;
+    }
+  }
+
+  .place{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    color: #4B5237;
+    font-size: 2rem;
+    font-family: "Julius Sans One", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .info{
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    color: #4b5237ab;
+    font-size: 0.6rem;
+    font-weight: 900;
+    font-family: "Julius Sans One", sans-serif;
+    
+    justify-content: center;
+    align-items: end;
+    text-align:center;
+    padding-bottom: 1rem;
+  }
+ .imageContainer {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    overflow: hidden;
+    transition: all 1s ease-in-out;
+  }
+
+  .image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .animationContainer{
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: 100;
+    pointer-events: none;
+    
+  }
+
+  .petal{
+    width: 8rem;
+    height: 8rem;
+  }
+
+  .largePetal {
+    position: absolute; /* Allow movement within animationContainer */
+    width: 50rem; /* Adjust size as needed */
+    height: auto;
+    z-index: -10;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    pointer-events: none; /* Allow interaction with content below */
+  }
+  .emptyContainer{
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: #A2A695;
+  }
