@@ -9,7 +9,7 @@ export default function NotFound(){
                 <span>NOTHING</span> <span>FOUND</span>
             </div>
 
-            <div><p className={styles.explanation}>THE PAGE YOU ARE LOOKING FOR DOES NOT EXIST, YOU MAY HAVE ENTERED THE WRONG ADDRESS OR WE MAY HAVE MOVED THE PAGE.</p></div>
+            <div><p className={styles.explanation}>THE PAGE YOU ARE LOOKING FOR DOES NOT EXIST, TRY REFRESHING ! IF IT DIDN'T WORK YOU MAY HAVE ENTERED THE WRONG ADDRESS OR WE MAY HAVE MOVED THE PAGE.</p></div>
 
             <div className={styles.goMain}>
                 <Link to="/">BACK TO EXPLORE</Link>

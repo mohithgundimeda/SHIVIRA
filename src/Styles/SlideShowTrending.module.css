@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Cormorant";
+  src:url("/public/fonts/Cormorant/Cormorant-Regular.ttf") format("truetype") ;
+  font-display: swap; 
+  font-weight: normal; 
+  font-style: normal; 
+}
+
 
 .container{
     position: relative;
@@ -91,6 +99,7 @@
   
     .imageContainer::after {
       font-size: 1rem;
+      letter-spacing: 0.1rem;
     }
   }
 
@@ -102,7 +111,8 @@
     }
   
     .imageContainer::after {
-      font-size: 0.7rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.1rem;
     }
   }
   

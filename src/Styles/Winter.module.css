@@ -1,3 +1,10 @@
+@font-face {
+    font-family: "Jost";
+    src:url("/public/fonts/Jost/Jost-Regular.ttf") format("truetype") ;
+    font-display: swap; 
+    font-weight: normal; 
+    font-style: normal; 
+  }
 
 .container {
     position: relative;
@@ -62,6 +69,7 @@
     color: transparent;
     font-size: 15rem;
     margin: 0;
+    
 }
 
 .WinterContent{
@@ -96,6 +104,7 @@
     font-weight: 500;
     text-align: center;
     cursor: default;
+    font-weight: 600;
 }
 
 .contentText{
@@ -108,7 +117,7 @@
     color: rgba(255, 255, 255, 0.2);
     text-shadow: 0px 2px 1px rgba(15, 15, 15, 0.07);
     cursor: default;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .flex{
@@ -143,6 +152,7 @@
     right:2rem;
     bottom:1rem;
     display: flex;
+    align-items: center;
   }
 
   .mui{

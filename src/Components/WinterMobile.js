@@ -42,8 +42,8 @@ export default function WinterMobile() {
                 alt={groupedImages[index].alt}
                 className={styles.image}
                 onError={(e) => { e.target.src = "/static/placeHolder.jpeg"; }}
-                loading="lazy"
-                decoding="async"
+                loading = "lazy"
+                decoding = "async"
               />
             </picture>
           </div>
@@ -157,7 +157,7 @@ export default function WinterMobile() {
   return (
     <div ref={containerRef} className={styles.container}>
       <div className={styles.sectionName}>
-        <p ref={textRef} className={styles.text}>WINTER</p>
+        <p ref={textRef}>WINTER</p>
       </div>
       <div ref={gridRef} className={styles.grid}>
         {content}

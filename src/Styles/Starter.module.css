@@ -1,3 +1,19 @@
+@font-face {
+    font-family: "Kaushan Script";
+    src:url("/public/fonts/Kaushan_Script/KaushanScript-Regular.ttf") format("truetype") ;
+    font-display: swap; 
+    font-weight: normal; 
+    font-style: normal; 
+  }
+
+  @font-face {
+    font-family: "Merienda";
+    src:url("/public/fonts/Merienda/Merienda-Regular.ttf") format("truetype") ;
+    font-display: swap; 
+    font-weight: normal; 
+    font-style: normal; 
+  }
+
 .starter {
     width: 100vw;
     overflow-x: hidden;

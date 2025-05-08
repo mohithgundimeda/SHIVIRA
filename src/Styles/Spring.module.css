@@ -1,3 +1,12 @@
+@font-face {
+  font-family: "JuliusSansOne";
+  src:url("/public/fonts/Julius_Sans_One/JuliusSansOne-Regular.ttf") format("truetype") ;
+  font-display: swap; 
+  font-weight: normal; 
+  font-style: normal; 
+}
+
+
 .container {
     position: relative;
     width: 100%;
@@ -10,10 +19,10 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    font-size: 5rem;
+    font-size: clamp(4rem, 2.851rem + 2.388vw, 5rem);
     color: #4B5237;
     text-align: center;
-    font-family: "Julius Sans One", sans-serif;
+    font-family: "JuliusSansOne", sans-serif;
     cursor: default;
   }
   .char {
@@ -55,8 +64,8 @@
     width: 100%;
     height: 100%;
     color: #4B5237;
-    font-size: 2rem;
-    font-family: "Julius Sans One", sans-serif;
+    font-size: clamp(2rem, 0.851rem + 2.388vw, 3rem);
+    font-family: "JuliusSansOne", sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -68,10 +77,9 @@
     width: 100%;
     height: 100%;
     color: #4b5237ab;
-    font-size: 0.6rem;
+    font-size: clamp(0.6rem, 0.37rem + 0.478vw, 0.8rem);
     font-weight: 900;
-    font-family: "Julius Sans One", sans-serif;
-    
+    font-family: "JuliusSansOne", sans-serif;
     justify-content: center;
     align-items: end;
     text-align:center;
@@ -100,7 +108,6 @@
     overflow: hidden;
     z-index: 100;
     pointer-events: none;
-    
   }
 
   .petal{
@@ -108,18 +115,30 @@
     height: 8rem;
   }
 
-  .largePetal {
-    position: absolute; /* Allow movement within animationContainer */
-    width: 50rem; /* Adjust size as needed */
-    height: auto;
-    z-index: -10;
-    object-fit: cover;
-    transform: translate(-50%, -50%);
-    pointer-events: none; /* Allow interaction with content below */
-  }
   .emptyContainer{
     position: relative;
     width: 100%;
     height: 100vh;
     background-color: #A2A695;
+    overflow: hidden;
   }
+
+  .sectionNameContainer{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 0;
+  }
+
+  .summer{
+    font-family: "JuliusSansOne", sans-serif;
+    font-size: clamp(4rem, 2.851rem + 2.388vw, 5rem);
+    color: beige;
+    text-align: center;
+    cursor: default;
+    opacity: 0;
+  }
+

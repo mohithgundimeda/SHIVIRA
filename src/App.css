@@ -5,7 +5,7 @@
 }
 
 
-/* html, body {
+html, body {
     -ms-overflow-style: none; 
     scrollbar-width: none; 
     width: 100%; 
@@ -15,7 +15,7 @@
  
   html::-webkit-scrollbar, body::-webkit-scrollbar {
     display: none;
-  } */
+  }
 
 body{
     margin: 0;

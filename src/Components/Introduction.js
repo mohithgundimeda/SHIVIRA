@@ -69,7 +69,7 @@ const Introduction = ({ onComplete }) => {
           strokeDashoffset: 0,
           duration: 1.7,
           ease: "power2.in",
-          stagger: 0.4,
+          stagger: 0.2,
         },
         "-=1.5"
       )

@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { Skeleton } from "@mui/material";
-import styles from "../Styles/DCard.module.css";
 
 
 const ImageWithSkeleton = React.memo(

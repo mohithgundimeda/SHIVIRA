@@ -1,0 +1,107 @@
+/* Container Styles */
+.Container {
+  width: 100vw;
+  position: relative;
+  background-color: #dfa579;
+}
+
+/* Panel Styles */
+.panel {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.colored {
+  background-color: #dfa579;
+}
+
+.transparent {
+  background: transparent;
+}
+
+.panelText {
+  color: beige;
+  text-transform: uppercase;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Julius Sans One", sans-serif;
+  font-size: clamp(1.5rem, -0.799rem + 4.776vw, 3.5rem);
+  letter-spacing: 0.6rem;
+  cursor: default;
+  margin: 0;
+}
+
+.seemore {
+  color: beige;
+  text-transform: uppercase;
+  font-size: clamp(0.8rem, 0.34rem + 0.955vw, 1.2rem);
+  font-family: "Julius Sans One", sans-serif;
+  cursor: pointer;
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translate(-50%, -10%);
+  padding-bottom: 5px;
+  margin: 0;
+}
+
+.seemore::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background-color: beige;
+  transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
+}
+
+.seemore:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Background and Blade Styles */
+.backgroundContainer {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.blade {
+  width: 30%;
+  height: 90%;
+  position: absolute;
+  overflow: hidden;
+}
+
+.bladeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.9);
+}
+
+/* Error Fallback */
+.errorContainer {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: beige;
+  font-family: "Julius Sans One", sans-serif;
+  font-size: 1.5rem;
+  text-align: center;
+  background-color: #dfa579;
+}

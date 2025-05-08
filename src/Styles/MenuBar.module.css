@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Quicksand";
+  src:url("/public/fonts/Quicksand/Quicksand-Regular.ttf") format("truetype") ;
+  font-display: swap; 
+  font-weight: normal; 
+  font-style: normal; 
+}
+
 .hero {
   z-index: 100;
   width: 100%;

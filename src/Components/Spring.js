@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from '../Styles/Spring.module.css';
-import { useIsMobile } from './useIsMobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,26 +11,18 @@ export default function Spring() {
   const containerRef = useRef(null);
   const animationContainerRef = useRef(null);
   const emptyRef = useRef(null);
-  const largePetalRef = useRef(null);
-  const isMobile = useIsMobile();
+  const summerRef = useRef(null);
   const [viewportDimensions, setViewportDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
-
-  const places = useMemo(() => ['KERALA', 'PROVENCE', 'KYOTO', 'AMSTERDAM', 'LISBON'], []);
-  const paths = useMemo(() => [
-    '/static/spring/munnar.jpg',
-    '/static/spring/provence.jpg',
-    '/static/destinations/kyoto/kyoto-jpg/kyoto-jpg-large/kyoto1.jpg',
-    '/static/spring/netherlands2.webp',
-    '/static/spring/lisbon.jpg',
-  ], []);
+  const places = useMemo(() => ['kerala', 'bhutan', 'nainital', 'nepal', 'ooty'], []);
+  const formats = useMemo(() => ['webp', 'jpg'], []);
+  const daysAndNights = useMemo(() => [[[5, 6], [8, 9]], [[5, 6], [8, 9]], [[5,6],[10,11]], [[5,6],[10,11]], [[4,5],[6,7]]], []);
   const imageInfoRef = useRef(places.map(() => React.createRef(null)));
   const imageRefs = useRef(places.map(() => React.createRef(null)));
   const basePetals = useMemo(() => ['brownpetal', 'whitepetal', 'whitepetal2'], []);
 
-  // Debounced resize handler for performance
   useEffect(() => {
     let resizeTimeout;
     const handleResize = () => {
@@ -41,6 +32,7 @@ export default function Spring() {
           width: window.innerWidth,
           height: window.innerHeight,
         });
+        ScrollTrigger.refresh();
       }, 200);
     };
     window.addEventListener('resize', handleResize);
@@ -50,10 +42,11 @@ export default function Spring() {
     };
   }, []);
 
-  // Unified animation function for elements
+
+
   const animateElements = useCallback((elements, options = {}) => {
     if (!elements?.length) return;
-    const { start = 'top center+=100px', duration = 0.5 } = options;
+    const { start = 'top bottom', duration = 0.2 } = options;
     elements.forEach((element) => {
       if (element) {
         gsap.set(element, { opacity: 0 });
@@ -94,67 +87,63 @@ export default function Spring() {
 
   // Petal animation
   const animatePetals = useCallback((petalElements) => {
-    if (!petalElements?.length || !viewportDimensions || !emptyRef.current) return;
+    if (!petalElements?.length || !viewportDimensions || !emptyRef.current || !summerRef.current) return;
     petalElements.forEach((petal) => {
-      const offScreenDistance = isMobile ? -0.75 * viewportDimensions.width : -1.5 * viewportDimensions.width;
+      const offScreenDistance = -1.5 * viewportDimensions.width;
       gsap.set(petal, {
         x: gsap.utils.random(offScreenDistance, -viewportDimensions.width),
         y: viewportDimensions.height + gsap.utils.random(0, 200),
         rotation: gsap.utils.random(-45, 45),
-        scale: gsap.utils.random(0.5, 2),
+        scale: gsap.utils.random(0.5, 2.1),
       });
 
       const aspectRatio = viewportDimensions.width / viewportDimensions.height;
-      const diagonalYEnd = -viewportDimensions.height * aspectRatio;
+      const diagonalYEnd = -viewportDimensions.height * aspectRatio + 1000;
 
-      gsap.to(petal, {
-        x: viewportDimensions.width,
-        y: diagonalYEnd,
-        duration: 5,
-        ease: 'none',
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: emptyRef.current,
           start: 'top top',
           end: '+=1000px',
-          scrub: 5,
-          invalidateOnRefresh: true,
+          scrub: 3,
         },
       });
-    });
-  }, [isMobile, viewportDimensions]);
 
-  // Large petal animation
-  const animateLargePetal = useCallback(() => {
-    if (!largePetalRef.current || !viewportDimensions || !emptyRef.current) return;
-    gsap.set(largePetalRef.current, {
-      x: -viewportDimensions.width,
-      y: viewportDimensions.height,
-      scale: 1,
-      transform: 'translate(-50%, -50%)',
-    });
-    const aspectRatio = viewportDimensions.width / viewportDimensions.height;
-    const diagonalYEnd = -viewportDimensions.height * aspectRatio;
-    gsap.to(largePetalRef.current, {
-      x: viewportDimensions.width,
-      y: diagonalYEnd,
-      duration: 5,
-      transform: 'translate(-50%, -50%)',
-      rotation: 90,
-      scale: 1.1,
-      ease: 'power1.out',
-      scrollTrigger: {
-        trigger: emptyRef.current,
-        start: 'top top',
-        end: '+=1000px',
-        scrub: 5,
-        invalidateOnRefresh: true,
-      },
+      tl.to(petal, {
+        x: viewportDimensions.width + 100,
+        y: diagonalYEnd,
+        duration: 5,
+        ease: 'none',
+      }).add(
+        gsap.to(
+          emptyRef.current,{
+            backgroundImage:'linear-gradient(90deg,rgb(19, 30, 39) 0%, #517fa4 100%)',
+            duration:5,
+            ease:'expo.inOut',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: emptyRef.current,
+              start: 'top top',
+              end: '+=1000px',
+              scrub: 3,
+            },
+          }),'<'
+      ).to(
+         summerRef.current,{
+          opacity:1,
+          duration:1,
+          ease:'expo.in'
+        }
+      ,'<+=2').to(petal,{
+        autoAlpha:0,
+        duration:1
+      });
     });
   }, [viewportDimensions]);
 
   // Main animation setup
   useEffect(() => {
-    if (!textRef.current || !gridRef.current || !animationContainerRef.current || !emptyRef.current || !largePetalRef.current) {
+    if (!textRef.current || !gridRef.current || !animationContainerRef.current || !emptyRef.current) {
       console.warn('Required refs are missing, skipping animation setup');
       return;
     }
@@ -184,7 +173,6 @@ export default function Spring() {
       animateElements(infoElements);
       animateElements(imageElements);
       animatePetals(petalElements);
-      animateLargePetal();
 
       gsap.to(emptyRef.current, {
         scrollTrigger: {
@@ -199,9 +187,19 @@ export default function Spring() {
     }, containerRef.current);
 
     return () => ctx.revert();
-  }, [animateText, animateElements, animatePetals, animateLargePetal, places, isMobile, viewportDimensions]);
+  }, [animateText, animateElements, animatePetals, places, viewportDimensions]);
 
-  // Content generation
+  const groupedImages = useMemo(() => {
+    return places.map((name) => {
+      const placeObj = { alt: name };
+      formats.forEach((form) => {
+        placeObj[form] = `/static/spring/${name}/${name}-${form}/${name}-${form}-large/${name}1.${form}`;
+      });
+      return placeObj;
+    });
+  }, [places, formats]);
+
+  // Content generation with <picture> tag
   const content = useMemo(() => {
     return places.map((place, index) => {
       const infoRef = imageInfoRef.current[index];
@@ -210,26 +208,29 @@ export default function Spring() {
         <React.Fragment key={index}>
           <div ref={infoRef} className={styles.imageinfo}>
             <p className={styles.place}>{place}</p>
-            <p className={styles.info}>Packages typically range from 5N / 6D to 9N / 10D</p>
+            <p className={styles.info}>{`Packages typically range from 
+            ${daysAndNights[index][0][0]}N / ${daysAndNights[index][0][1]}D to ${daysAndNights[index][1][0]}N / ${daysAndNights[index][1][1]}D. click to see more`}</p>
           </div>
           <div ref={imageRef} className={styles.imageContainer}>
-            <img
-              src={paths[index]}
-              className={styles.image}
-              alt={`Spring destination in ${place}`}
-              onError={(e) => { e.target.src = '/static/spring/fallback.jpg'; }}
-              loading="lazy"
-              decoding="async"
-            />
+            <picture>
+              <source srcSet={groupedImages[index].webp} type="image/webp" />
+              <img
+                src={groupedImages[index].jpg}
+                alt={`Spring destination in ${place}`}
+                className={styles.image}
+                onError={(e) => { e.target.src = '/static/spring/fallback.jpg'; }}
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </div>
         </React.Fragment>
       );
     });
-  }, [places, paths]);
+  }, [places, groupedImages, daysAndNights]);
 
-  // Petals generation with reduced count
   const petals = useMemo(() => {
-    const petalCount = isMobile ? 10 : 50; // Further reduced for production performance
+    const petalCount = 60;
     const regularPetals = Array.from({ length: petalCount }, (_, i) => (
       <img
         key={`petal-${i}`}
@@ -241,32 +242,23 @@ export default function Spring() {
         decoding="async"
       />
     ));
-    const largePetal = (
-      <img
-        ref={largePetalRef}
-        key="largePetal"
-        className={styles.largePetal}
-        src={`/static/spring/${basePetals[1]}.png`}
-        alt="Large decorative spring petal"
-        onError={(e) => { e.target.src = '/static/logo2.png'; }}
-        loading="lazy"
-        decoding="async"
-      />
-    );
-    return [...regularPetals, largePetal];
-  }, [basePetals, isMobile]);
+    return [...regularPetals];
+  }, [basePetals]);
 
   return (
     <div ref={containerRef} className={styles.container}>
       <div className={styles.sectionName}>
         <p ref={textRef} className={styles.text}>SPRING</p>
       </div>
-      <div ref={gridRef} className={styles.grid} style={{ marginTop: isMobile ? '5rem' : '15rem' }}>
+      <div ref={gridRef} className={styles.grid} style={{ marginTop: '15rem' }}>
         {content}
       </div>
       <div ref={emptyRef} className={styles.emptyContainer}>
         <div ref={animationContainerRef} className={styles.animationContainer}>
           {petals}
+        </div>
+        <div className={styles.sectionNameContainer}>
+          <p ref={summerRef} className={styles.summer}>SUMMER</p> 
         </div>
       </div>
     </div>

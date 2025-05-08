@@ -1,4 +1,10 @@
-
+@font-face {
+    font-family: "Cormorant";
+    src:url("/public/fonts/Cormorant/Cormorant-Regular.ttf") format("truetype") ;
+    font-display: swap; 
+    font-weight: normal; 
+    font-style: normal; 
+  }
 
 .container{
     width: 100%;
@@ -20,24 +26,19 @@
     flex-direction: column;
     z-index: 10;
     pointer-events: none;
+    font-family: "Cormorant", serif;
+    text-transform:uppercase;
+    color: black;
 }
 
 .endQuote{
     font-size: clamp(0.7rem, 0.614rem + 0.429vw, 1rem);
-    font-family: "Cormorant", serif;
-    text-transform:uppercase;
-    color: black;
-    z-index: 1;
 }
 
 .endQuote2{
     font-size: clamp(4rem, 2.857rem + 5.714vw, 8rem);
-    letter-spacing:clamp(0.5rem, 0.357rem + 0.714vw, 1rem); 
-     font-family: "Cormorant", serif;
-     font-weight: 600;
-    text-transform:uppercase;
-    color: black;
-    z-index: 1;
+    letter-spacing:clamp(0.5rem, 0.357rem + 0.714vw, 1rem);
+    font-weight: 500;
 }
 .endQuote span {
     display: inline-block;
