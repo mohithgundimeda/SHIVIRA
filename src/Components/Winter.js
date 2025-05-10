@@ -17,7 +17,7 @@ const WinterdaysAndNights = [
   [[4, 5], [6, 7]],
 ];
 
-const LOGO_FALLBACK = 'static/logo.png';
+const LOGO_FALLBACK = 'static/logo4.png';
 
 // Component for each place's content
 const PlaceContent = ({ place, index, layerRef, curtonRef, WinterdaysAndNights }) => {

@@ -38,17 +38,22 @@ export default function SpringMobile() {
             </p>
           </div>
           <div ref={imageRef} className={styles.imageContainer}>
-            <picture>
-              <source srcSet={groupedImages[index].webp} type="image/webp" />
-              <img
-                src={groupedImages[index].jpg}
-                alt={groupedImages[index].alt}
-                className={styles.image}
-                onError={(e) => { e.target.src = "/static/placeHolder.jpeg"; }}
-                loading="lazy"
-                decoding="async"
-              />
-            </picture>
+            <img
+              src={groupedImages[index].webp}
+              alt={groupedImages[index].alt}
+              className={styles.image}
+              onError={(e) => {
+                e.target.src = groupedImages[index].jpg;
+                console.log(`Switching to JPG: ${groupedImages[index].jpg}`);
+                e.target.onerror = () => {
+                  console.error(`Failed to load JPG: ${groupedImages[index].jpg}`);
+                  e.target.src = '/static/logo4.png';
+                  console.log(`Falling back to logo: /static/logo4.png`);
+                };
+              }}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </React.Fragment>
       );
@@ -142,7 +147,7 @@ export default function SpringMobile() {
       animateElementsEnd([textRef, gridRef]);
 
       gsap.to(containerRef.current, {
-        backgroundImage:'linear-gradient(90deg,rgb(19, 30, 39) 0%, #517fa4 100%)',
+        backgroundImage: 'linear-gradient(90deg,rgb(19, 30, 39) 0%, #517fa4 100%)',
         ease: 'expo.inOut',
         scrollTrigger: {
           trigger: containerRef.current,

@@ -13,7 +13,7 @@ const DEFAULT_HEIGHT = 1080;
 const CONTROL_POINT_FACTOR = 0.05;
 const SCRUB_DELAY = 5;
 
-export default function Summer({sunSrc = 'static/summer/sun.png', moonSrc = 'static/summer/moon3.png'}) {
+export default function Summer({sunSrc = 'static/summer/sun.png', moonSrc = 'static/summer/moon.png'}) {
   const sunRef = useRef(null);
   const moonRef = useRef(null);
   const contentRef = useRef(null);

@@ -1,4 +1,12 @@
 /* Container Styles */
+@font-face {
+  font-family: "JuliusSansOne";
+  src: url("/public/fonts/Julius_Sans_One/JuliusSansOne-Regular.ttf") format("truetype");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+}
+
 .Container {
   width: 100vw;
   position: relative;
@@ -28,7 +36,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: "Julius Sans One", sans-serif;
+  font-family: "JuliusSansOne", sans-serif;
   font-size: clamp(1.5rem, -0.799rem + 4.776vw, 3.5rem);
   letter-spacing: 0.6rem;
   cursor: default;
@@ -39,7 +47,7 @@
   color: beige;
   text-transform: uppercase;
   font-size: clamp(0.8rem, 0.34rem + 0.955vw, 1.2rem);
-  font-family: "Julius Sans One", sans-serif;
+  font-family: "JuliusSansOne", sans-serif;
   cursor: pointer;
   position: absolute;
   bottom: 10%;
@@ -100,7 +108,7 @@
   justify-content: center;
   align-items: center;
   color: beige;
-  font-family: "Julius Sans One", sans-serif;
+  font-family: "JuliusSansOne", sans-serif;
   font-size: 1.5rem;
   text-align: center;
   background-color: #dfa579;

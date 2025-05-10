@@ -15,7 +15,7 @@ const PLACES_DATA = [
   'alsace',
 ];
 
-const ASSET_PATH = '/static/autumn';
+const ASSET_PATH ='/static/autumn';
 
 // Component
 export default function Autumn() {
@@ -26,19 +26,20 @@ export default function Autumn() {
   const imageRef = useRef([]);
   const isInitialized = useRef(false);
 
-  // Memoized places data
+  
   const placesData = useMemo(() => PLACES_DATA, []);
 
-  // Memoized image data
+ 
   const groupedImages = useMemo(() => {
     if (!placesData.length) return [];
     return placesData.map((name) => ({
       alt: name,
+      webp: `${ASSET_PATH}/${name}/${name}-webp/${name}-webp-large/${name}1.webp`,
       jpg: `${ASSET_PATH}/${name}/${name}-jpg/${name}-jpg-large/${name}1.jpg`,
     }));
   }, [placesData]);
 
-  // Memoized panels
+  
   const panels = useMemo(() => {
     if (!placesData.length) return null;
     const panelArray = [];
@@ -50,6 +51,7 @@ export default function Autumn() {
           key={`panel-${i}`}
           ref={(el) => (panelRef.current[i] = el)}
           className={`${styles.panel} ${isColored ? styles.colored : styles.transparent}`}
+
         >
           {isColored && (
             <>
@@ -63,12 +65,20 @@ export default function Autumn() {
     return panelArray;
   }, [placesData]);
 
-  // Memoized blades
   const blades = useMemo(() => {
     if (!placesData.length || !groupedImages.length) return null;
     const bladeArray = [];
     for (let i = 0; i < placesData.length; i++) {
       const item = groupedImages[i];
+      const handleImageError = (e) => {
+        e.target.src = item.jpg;
+        console.log(`Switching to JPG: ${item.jpg}`);
+        e.target.onerror = () => {
+          console.error(`Failed to load JPG: ${item.jpg}`);
+          e.target.src = '/static/logo4.png';
+          console.log(`Falling back to logo: /static/logo4.png`);
+        };
+      };
       bladeArray.push(
         <div
           key={`blade-${i}`}
@@ -79,15 +89,12 @@ export default function Autumn() {
           <picture>
             <img
               ref={(el) => (imageRef.current[i] = el)}
-              src={item.jpg}
+              src={item.webp}
               alt={item.alt}
               loading="lazy"
               decoding="async"
               className={styles.bladeImage}
-              onError={(e) => {
-                e.target.src = '/static/logo4.png';
-                console.warn(`Failed to load image: ${item.jpg}`);
-              }}
+              onError={handleImageError}
             />
           </picture>
         </div>
@@ -96,8 +103,9 @@ export default function Autumn() {
     return bladeArray;
   }, [placesData, groupedImages]);
 
-  // Setup GSAP animations
+  
   const setupAnimations = useCallback(() => {
+    
     if (
       !containerRef.current ||
       !backgroundRef.current ||
@@ -122,20 +130,14 @@ export default function Autumn() {
       // Initialize background
       gsap.set(backgroundRef.current, { autoAlpha: 0 });
 
-      // Pin background with adjusted pinSpacing
+      // Pin background
       ScrollTrigger.create({
         trigger: containerRef.current,
         start: 'top top',
         end: `+=${totalHeight}`,
         pin: backgroundRef.current,
-        pinSpacing: true, // Changed to true to ensure scroll height is respected
+        pinSpacing: true,
         anticipatePin: 1,
-        onRefresh: () => {
-          // Notify Lenis of updated scroll height
-          if (window.lenis) {
-            window.lenis.resize();
-          }
-        },
       });
 
       // Fade in background
@@ -149,10 +151,9 @@ export default function Autumn() {
         },
       });
 
-      // Background color transition
       gsap.to(containerRef.current, {
         backgroundColor: 'black',
-        ease: 'expo.inOut',
+        ease:'expo.inOut',
         scrollTrigger: {
           trigger: panelRef.current[panelRef.current.length - 2] || null,
           start: 'bottom top',
@@ -205,54 +206,39 @@ export default function Autumn() {
       });
     }, containerRef.current);
 
-    // Force ScrollTrigger refresh after setup
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-      if (window.lenis) {
-        window.lenis.resize();
-      }
-    }, 100);
-
     return ctx;
   }, [placesData]);
 
-  // Effect for animations and cleanup
+  
   useEffect(() => {
     if (isInitialized.current) return;
     isInitialized.current = true;
 
-    // Delay animation setup to ensure DOM is fully rendered
-    const timeout = setTimeout(() => {
-      const ctx = setupAnimations();
+    const ctx = setupAnimations();
 
-      let resizeTimeout;
-      const handleResize = () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-          ScrollTrigger.refresh();
-          if (window.lenis) {
-            window.lenis.resize();
-          }
-        }, 200);
-      };
+    
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 200);
+    };
 
-      window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize);
 
-      return () => {
-        if (ctx) ctx.revert();
-        window.removeEventListener('resize', handleResize);
-        clearTimeout(resizeTimeout);
-        isInitialized.current = false;
-        panelRef.current = [];
-        bladeRef.current = [];
-        imageRef.current = [];
-      };
-    }, 100);
-
-    return () => clearTimeout(timeout);
+    return () => {
+      if (ctx) ctx.revert();
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+      isInitialized.current = false;
+      panelRef.current = [];
+      bladeRef.current = [];
+      imageRef.current = [];
+    };
   }, [setupAnimations]);
 
-  // Fallback UI for errors
+  
   if (!placesData.length || !panels || !blades) {
     return (
       <div className={styles.errorContainer}>

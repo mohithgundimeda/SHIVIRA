@@ -36,20 +36,24 @@ export default function AutumnMobile() {
         </p>
       </div>
       <div ref={(el) => (imageRefs.current[index] = el)} className={styles.imageContainer}>
-        <picture>
-          {/* <source srcSet={groupedImages[index].webp} type="image/webp" /> */}
+        
           <img
-            src={groupedImages[index].jpg}
+            src={groupedImages[index].webp}
             alt={groupedImages[index].alt}
             className={styles.image}
             onError={(e) => {
-              e.target.src = "/static/placeHolder.jpeg";
-              console.warn(`Failed to load image: ${groupedImages[index].jpg}`);
+              e.target.src = groupedImages[index].jpg;
+              console.log(`Switching to JPG: ${groupedImages[index].jpg}`);
+              e.target.onerror = () => {
+                console.error(`Failed to load JPG: ${groupedImages[index].jpg}`);
+                e.target.src = '/static/logo4.png';
+                console.log(`Falling back to logo: /static/logo4.png`);
+              };
             }}
             loading="lazy"
             decoding="async"
           />
-        </picture>
+      
       </div>
     </React.Fragment>
   )) : null;

@@ -30,14 +30,13 @@ export default function ReverseSlideShowTrending({ pinComplete, pinnedContainer 
     []
   );
 
-  const sizes = useMemo(() => ["small", "medium","xlarge"], []);
+  const sizes = useMemo(() => ["small", "medium","large"], []);
 
   const groupedImages = useMemo(() => {
     return images.map((name) => {
       const imageObj = { alt: name };
       sizes.forEach((size) => {
         imageObj[size] = {
-          webp: `/static/trending/trending-${size}/trending-${size}-webp/slideshow2/${name}.webp`,
           jpg: `/static/trending/trending-${size}/trending-${size}-jpg/slideshow2/${name}.jpg`,
         };
       });
@@ -136,22 +135,7 @@ export default function ReverseSlideShowTrending({ pinComplete, pinnedContainer 
               <picture>
                 <source
                   media="(min-width: 1020px)"
-                  srcSet={image.xlarge.webp}
-                  type="image/webp"
-                />
-                <source
-                  media="(min-width: 601px)"
-                  srcSet={image.medium.webp}
-                  type="image/webp"
-                />
-                <source
-                  media="(max-width: 600px)"
-                  srcSet={image.small.webp}
-                  type="image/webp"
-                />
-                <source
-                  media="(min-width: 1020px)"
-                  srcSet={image.xlarge.jpg}
+                  srcSet={image.large.jpg}
                   type="image/jpeg"
                 />
                 <source
@@ -165,7 +149,7 @@ export default function ReverseSlideShowTrending({ pinComplete, pinnedContainer 
                   type="image/jpeg"
                 />
                 <img
-                  src={image.xlarge.jpg}
+                  src={image.large.jpg}
                   alt={image.alt}
                   loading="lazy"
                   decoding="async"

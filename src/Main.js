@@ -14,17 +14,13 @@ import Summer from './Components/Summer';
 import SummerMobile from './Components/SummerMobile';
 import Autum from './Components/Autum';
 import AutumnMobile from './Components/AutumnMobile';
-import WhyShivira from './Components/WhyShivira';
+import Contact from './Components/Contact';
 
 export default function Main() {
   const [showIntro, setShowIntro] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
-
-  
-
-
 
   useEffect(() => {
     try {
@@ -65,7 +61,7 @@ export default function Main() {
         {SpringComponent && <SpringComponent />}
         {SummerComponent && <SummerComponent />}
         {AutumnComponent && <AutumnComponent />}
-        <WhyShivira />
+        <Contact />
       </div>
     );
   }, [introComplete, WinterComponent, SpringComponent, SummerComponent, AutumnComponent]);

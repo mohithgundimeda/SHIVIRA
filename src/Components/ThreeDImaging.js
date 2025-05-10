@@ -8,7 +8,7 @@ export default function ThreeDImaging({ trendingContentRef }) {
   const mainRef = useRef(null);
   const ctx = useRef(null);
   const imageName = useMemo(() => ['mahal-foreground-edited'], []);
-  const sizes = useMemo(() => ["small", "medium", "large", "xlarge"], []);
+  const sizes = useMemo(() => ["small", "medium", "large"], []);
   
   const groupedImages = useMemo(() => {
     return imageName.map((name) => {
@@ -86,11 +86,10 @@ export default function ThreeDImaging({ trendingContentRef }) {
         <div className={styles.imageWrapper}>
         <div className={styles.imageForeContainer}>
           <picture>
-            <source media="(min-width: 1441px)" srcSet={groupedImages[0].xlarge.webp} type="image/webp" />
+           
             <source media="(min-width: 1020px)" srcSet={groupedImages[0].large.webp} type="image/webp" />
             <source media="(min-width: 601px)" srcSet={groupedImages[0].medium.webp} type="image/webp" />
             <source media="(max-width: 600px)" srcSet={groupedImages[0].medium.webp} type="image/webp" />
-            <source media="(min-width: 1441px)" srcSet={groupedImages[0].xlarge.png} type="image/png" />
             <source media="(min-width: 1020px)" srcSet={groupedImages[0].large.png} type="image/png" />
             <source media="(min-width: 601px)" srcSet={groupedImages[0].medium.png} type="image/png" />
             <source media="(max-width: 600px)" srcSet={groupedImages[0].medium.png} type="image/png" />
