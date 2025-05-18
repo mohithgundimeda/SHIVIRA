@@ -30,161 +30,115 @@ export default function SummerContent({ contentRef, scrollDistance, svgDimension
     jpg: `/static/summer/${name}/${name}-jpg/${name}-jpg-large/${name}1.jpg`,
   })), [placesData]);
 
-  useEffect(() => {
-    if (
-      !contentRef.current ||
-      !fenceContainerRef.current ||
-      !scrollDistance ||
-      !leafRef.current ||
-      !autumnRef.current ||
-      !titleRef.current ||
-      !svgDimensions
-    ) {
-      console.warn('Missing required refs or props for SummerContent animations');
-      return;
-    }
+useEffect(() => {
+  if (
+    !contentRef.current ||
+    !fenceContainerRef.current ||
+    !scrollDistance ||
+    !leafRef.current ||
+    !autumnRef.current ||
+    !titleRef.current ||
+    !svgDimensions
+  ) {
+    console.warn('Missing required refs or props for SummerContent animations');
+    return;
+  }
 
-    // Validate svgDimensions consistency
-    if (
-      prevSvgDimensions.current &&
-      (prevSvgDimensions.current.width !== svgDimensions.width ||
-       prevSvgDimensions.current.height !== svgDimensions.height)
-    )
-    prevSvgDimensions.current = svgDimensions;
+  // Validate svgDimensions consistency
+  if (
+    prevSvgDimensions.current &&
+    (prevSvgDimensions.current.width !== svgDimensions.width ||
+     prevSvgDimensions.current.height !== svgDimensions.height)
+  )
+  prevSvgDimensions.current = svgDimensions;
 
-    const viewportHeight = window.innerHeight || 1080;
-    const targetY = -0.5 * viewportHeight;
+  // Capture ref values inside the effect
+  const fenceContainer = fenceContainerRef.current;
+  const leaf = leafRef.current;
+  const autumn = autumnRef.current;
+  const title = titleRef.current;
+  const fenceBlocks = fenceBlockRef.current;
 
-    const ctx = gsap.context(() => {
-      gsap.set(leafRef.current, { 
-        xPercent: -50, 
-        yPercent: -50, 
-        transformOrigin: 'center center',
-        autoAlpha: 0,
-        motionPath: {
-          path: '#leafPath',
-          alignOrigin: [0.5, 0.5],
-          start: 0,
-          end: 0,
-          immediateRender: true,
-        },
-      });
+  const viewportHeight = window.innerHeight || 1080;
+  const targetY = -0.5 * viewportHeight;
 
-      gsap.set(autumnRef.current, { autoAlpha: 0 });
+  const ctx = gsap.context(() => {
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: contentRef.current,
-          start: 'top top',
-          end: `+=${scrollDistance} bottom`,
-          scrub: 1,
-          invalidateOnRefresh: true,
-          onEnter: () => {
-            gsap.set(leafRef.current, {
-              motionPath: {
-                path: '#leafPath',
-                align: '#leafPath',
-                alignOrigin: [0.5, 0.5],
-                start: 0,
-                end: 0,
-                immediateRender: true,
-              },
-              autoAlpha: 1,
-            });
-          },
-          onRefresh: (self) => {
-            if (leafRef.current) {
-              const progress = self.progress;
-              const isInView = self.isActive;
-              if (isInView) {
-                gsap.set(leafRef.current, {
-                  motionPath: {
-                    path: '#leafPath',
-                    align: '#leafPath',
-                    alignOrigin: [0.5, 0.5],
-                    autoRotate: true,
-                    start: progress,
-                    end: progress,
-                    immediateRender: true,
-                  },
-                  scale: gsap.utils.interpolate(1, 3, progress),
-                  rotation: gsap.utils.interpolate(0, 30, progress),
-                  autoAlpha: progress > 0 ? 1 : 0,
-                });
-                if (progress === 1) {
-                  gsap.set(leafRef.current, {
-                    x: svgDimensions.width / 2,
-                    y: svgDimensions.height / 2,
-                    scale: 3,
-                    rotation: 30,
-                    autoAlpha: 1,
-                  });
-                }
-              } else {
-                gsap.set(leafRef.current, {
-                  motionPath: {
-                    path: '#leafPath',
-                    align: '#leafPath',
-                    alignOrigin: [0.5, 0.5],
-                    start: 0,
-                    end: 0,
-                    immediateRender: true,
-                  },
-                  scale: 1,
-                  rotation: 0,
-                  autoAlpha: 0,
-                });
-                tl.progress(0);
-              }
-              tl.progress(self.progress);
-            }
-          },
-        },
-      });
+    gsap.set(leaf, {
+      motionPath: {
+        path: '#leafPath',
+        align: '#leafPath',
+        alignOrigin: [0.5, 0.5],
+        start: 0,
+        end: 0,
+        immediateRender: true,
+      },
+    });
 
-      fenceBlockRef.current.forEach((ref, index) => {
-        if (ref.current) {
-          const cycleDuration = 12;
-          const startPosition = index * cycleDuration;
+    gsap.set(autumn, { autoAlpha: 0 });
 
-          tl.fromTo(
-            ref.current,
-            { y: 70 },
-            { y: targetY, duration: cycleDuration / 2, ease: 'expo.inOut' },
-            startPosition
-          ).to(
-            ref.current,
-            { y: 0, duration: cycleDuration / 2, ease: 'expo.inOut' },
-            startPosition + cycleDuration
-          );
-        }
-      });
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: contentRef.current,
+        start: 'top top',
+        end: `top+=${scrollDistance} bottom`,
+        scrub: 1,
+        invalidateOnRefresh: true,
+      },
+    });
 
-      tl.to(leafRef.current, {
-        duration: 5,
-        ease: 'linear',
-        motionPath: {
-          path: '#leafPath',
-          align: '#leafPath',
-          alignOrigin: [0.5, 0.5],
-          start: 0,
-          end: 1,
-        },
-        rotation: 30,
-      })
-      .to(fenceContainerRef.current, { autoAlpha: 0, ease: 'expo.inOut' }, '<')
-      .to(leafRef.current, { scale: 3, duration: 7, ease: 'expo.inOut' }, '<')
-      .to(autumnRef.current, { autoAlpha: 1, duration: 0.1 }, '>')
-      .to(autumnRef.current, {
-        backgroundImage: 'linear-gradient(to bottom, #c79081 0%, #dfa579 100%)',
-        duration: 1,
-        ease: 'expo.out',
-      }, '>+=1');
+    fenceBlocks.forEach((ref, index) => {
+      if (ref.current) {
+        const cycleDuration = 12;
+        const startPosition = index * cycleDuration;
 
-    }, contentRef);
+        tl.fromTo(
+          ref.current,
+          { y: 70 },
+          { y: targetY, duration: cycleDuration / 2, ease: 'expo.inOut' },
+          startPosition
+        ).to(
+          ref.current,
+          { y: 0, duration: cycleDuration / 2, ease: 'expo.inOut' },
+          startPosition + cycleDuration
+        );
+      }
+    });
 
-    return () => ctx.revert();
-  }, [contentRef, scrollDistance, svgDimensions]);
+    tl.to(leaf, {
+      duration: 5,
+      ease: 'linear',
+      motionPath: {
+        path: '#leafPath',
+        align: '#leafPath',
+        alignOrigin: [0.5, 0.5],
+        start: 0,
+        end: 1,
+      },
+      rotation: 30,
+    })
+    .to(fenceContainer, { autoAlpha: 0, ease: 'expo.inOut' }, '<')
+    .to(leaf, { scale: 3, duration: 7, ease: 'expo.inOut' }, '<')
+    .to(autumn, { autoAlpha: 1, duration: 0.1 }, '>')
+    .to(autumn, {
+      backgroundColor: '#574964',
+      // backgroundImage: 'linear-gradient(to bottom, #c79081 0%, #dfa579 100%)',
+      duration: 1,
+      ease: 'expo.out',
+    }, '>+=1');
+
+  }, contentRef);
+
+  return () => {
+    gsap.killTweensOf([fenceContainer, leaf, autumn, title]);
+    fenceBlocks.forEach((ref) => {
+      if (ref.current) {
+        gsap.killTweensOf(ref.current);
+      }
+    });
+    ctx.revert();
+  }
+}, [contentRef, scrollDistance, svgDimensions]);
 
   const blocks = placesData.map(({ name, display }, index) => {
     const handleImageError = (e) => {

@@ -1,16 +1,23 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, forwardRef } from "react";
+import PropTypes from "prop-types";
 import styles from "../Styles/Contact.module.css";
 import { gsap } from "gsap";
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from "gsap/TextPlugin";
-import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
-import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import YouTubeIcon from '@mui/icons-material/YouTube';
+import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import { useIsMobile } from "./useIsMobile.js";
 
-gsap.registerPlugin(TextPlugin);
+gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
+/**
+ * Contact information data for the component.
+ * @type {Array<{initial: string, hover: string, icon: JSX.Element, href: string, isExternal: boolean}>}
+ */
 const contactData = [
   {
     initial: "CALL US",
@@ -56,89 +63,155 @@ const contactData = [
   },
 ];
 
-export default function Contact() {
+/**
+ * Contact component for displaying interactive contact information.
+ * @component
+ * @param {Object} props - Component props
+ * @param {React.Ref} ref - Forwarded ref for the container
+ */
+const Contact = forwardRef((props, ref) => {
   const textRefs = useRef(contactData.map(() => React.createRef()));
   const headerRef = useRef(null);
   const iconRefs = useRef(contactData.map(() => React.createRef()));
+  const containerRef = useRef(null);
+  const isMobile = useIsMobile();
 
+  // Sync forwarded ref with internal container ref
   useEffect(() => {
-    // Log GSAP version for debugging
-    console.log("GSAP Version:", gsap.version);
+    if (ref) {
+      ref.current = containerRef.current;
+    }
+  }, [ref]);
 
-    // Set initial text for CONTACT header
-    gsap.set(headerRef.current, {
-      text: "CONTACT",
-      opacity: 1,
-    });
+  useEffect(()=>{
+    if(isMobile){
+      const ctx = gsap.context(()=>{
+          if(!containerRef.current || !headerRef.current) return;
+            gsap.set(containerRef.current,{backgroundColor:"#574964"});
+            gsap.set(headerRef.current,{opacity:0});
+            gsap.to(containerRef.current,{
+              backgroundColor:'black',
+              ease:'power2.out',
+              duration:0.6,
+              scrollTrigger:{
+                trigger:containerRef.current,
+                start:'top center+=100px',
+                end:'top center',
+                scrub:1,
+                invalidateOnRefresh:true
+              }
+            })
+            gsap.to(
+              headerRef.current,{
+                opacity:1,
+                ease:'power2.out',
+                duration:0.6,
+                 scrollTrigger:{
+                    trigger:containerRef.current,
+                    start:'top center+=100px',
+                    end:'top center',
+                    scrub:1,
+                    invalidateOnRefresh:true
+                  }
+              }
+            );
 
-    // Set initial state for text and icons
-    textRefs.current.forEach((ref, index) => {
-      gsap.set(ref.current, { opacity: 1 });
-      gsap.set(iconRefs.current[index].current, { opacity: 0, scale: 0.8 });
-    });
+      },containerRef);
+
+      return()=>ctx.revert();
+    }
+  },[isMobile]);
+
+  
+  useEffect(() => {
+    try {
+      gsap.set(headerRef.current, {
+        text: "CONTACT",
+        opacity: 1,
+      });
+
+      textRefs.current.forEach((ref, index) => {
+        gsap.set(ref.current, { opacity: 1 });
+        gsap.set(iconRefs.current[index].current, { opacity: 0, scale: 0.8 });
+      });
+    } catch (error) {
+      console.error("Error initializing GSAP animations:", error);
+    }
   }, []);
 
+  /**
+   * Handle mouse enter event for contact items.
+   * @param {number} index - Index of the contact item
+   */
   const handleMouseEnter = (index) => {
-    const pRef = textRefs.current[index];
-    const iconRef = iconRefs.current[index];
-    gsap.killTweensOf([headerRef.current, pRef.current, iconRef.current]);
+    try {
+      const pRef = textRefs.current[index];
+      const iconRef = iconRefs.current[index];
+      gsap.killTweensOf([headerRef.current, pRef.current, iconRef.current]);
 
+      gsap.to(headerRef.current, {
+        duration: 1.2,
+        text: {
+          value: contactData[index].hover,
+          newText: contactData[index].hover,
+          speed: 0,
+        },
+        ease: "bounce.out",
+        overwrite: "auto",
+      });
 
-    gsap.to(headerRef.current, {
-      duration: 1.2,
-      text: {
-        value: contactData[index].hover,
-        newText: contactData[index].hover,
-        speed: 0,
-      },
-      ease: "bounce.out",
-      overwrite: "auto",
-    });
-
-    
-    gsap.to(pRef.current, {
-      duration: 0.5,
-      opacity: 0,
-    });
-    gsap.to(iconRef.current, {
-      duration: 0.5,
-      opacity: 1,
-    });
+      gsap.to(pRef.current, {
+        duration: 0.5,
+        opacity: 0,
+      });
+      gsap.to(iconRef.current, {
+        duration: 0.5,
+        opacity: 1,
+      });
+    } catch (error) {
+      console.error("Error in handleMouseEnter:", error);
+    }
   };
 
+  /**
+   * Handle mouse leave event for contact items.
+   * @param {number} index - Index of the contact item
+   */
   const handleMouseLeave = (index) => {
-    const pRef = textRefs.current[index];
-    const iconRef = iconRefs.current[index];
-    gsap.killTweensOf([headerRef.current, pRef.current, iconRef.current]);
+    try {
+      const pRef = textRefs.current[index];
+      const iconRef = iconRefs.current[index];
+      gsap.killTweensOf([headerRef.current, pRef.current, iconRef.current]);
 
-    // Revert header to CONTACT
-    gsap.to(headerRef.current, {
-      duration: 1,
-      text: {
-        value: "CONTACT",
-        newText: "CONTACT",
-      },
-      ease: "power2.in",
-      overwrite: "auto",
-    });
+      gsap.to(headerRef.current, {
+        duration: 1,
+        text: {
+          value: "CONTACT",
+          newText: "CONTACT",
+        },
+        ease: "power2.in",
+        overwrite: "auto",
+      });
 
-    // Show text, hide icon
-    gsap.to(pRef.current, {
-      duration: 0.5,
-      opacity: 1,
-      scale: 1,
-      ease: "power2.in",
-    });
-    gsap.to(iconRef.current, {
-      duration: 0.5,
-      opacity: 0,
-      scale: 0.8,
-      ease: "power2.in",
-    });
+      gsap.to(pRef.current, {
+        duration: 0.5,
+        opacity: 1,
+        scale: 1,
+        ease: "power2.in",
+      });
+      gsap.to(iconRef.current, {
+        duration: 0.5,
+        opacity: 0,
+        scale: 0.8,
+        ease: "power2.in",
+      });
+    } catch (error) {
+      console.error("Error in handleMouseLeave:", error);
+    }
   };
 
   return (
-    <div className={styles.container}>
+    <div ref={containerRef} className={styles.container}>
       <div className={styles.contactContainer}>
         <div className={styles.NameANDLogo} ref={headerRef}>
           CONTACT
@@ -146,50 +219,53 @@ export default function Contact() {
       </div>
 
       <div className={styles.contentContainer}>
-       <div className={styles.gridContainer}>
-             {contactData.map((item, index) => (
-                <div key={item.initial} className={styles.gridItem}>
-
-                    <div
-                    style={{ position: "relative", display: "inline-block"}}
-                     
-                    className={styles.standAlone}
-                    >
-                    <a
-                        style={{textDecoration:'none', color:'white'}}
-                        href={item.href}
-                        target={item.isExternal ? "_blank" : undefined}
-                        rel={item.isExternal ? "noopener noreferrer" : undefined}
-                        aria-label={`Navigate to ${item.initial.toLowerCase()} contact`}
-                    >
-                     <p
-                        ref={textRefs.current[index]}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                     onMouseLeave={() => handleMouseLeave(index)}
-                        className={styles.pAndi}
-                    >
-                        {item.initial}
-                    </p>
-                   </a>
-
-                    <div
-                        ref={iconRefs.current[index]}
-                        className={styles.icon}
-                        
-                    >
-                        {item.icon}
-                    </div>
-
-                    </div>
-
+        <div className={styles.gridContainer}>
+          {contactData.map((item, index) => (
+            <div key={item.initial} className={styles.gridItem}>
+              <div
+                style={{ position: "relative", display: "inline-block" }}
+                className={styles.standAlone}
+              >
+                <a
+                  style={{ textDecoration: "none", color: "white" }}
+                  href={item.href}
+                  target={item.isExternal ? "_blank" : undefined}
+                  rel={item.isExternal ? "noopener noreferrer" : undefined}
+                  aria-label={`Navigate to ${item.initial.toLowerCase()} contact`}
+                >
+                  <p
+                    ref={textRefs.current[index]}
+                    onMouseEnter={() => !isMobile && handleMouseEnter(index)}
+                    onMouseLeave={() => !isMobile && handleMouseLeave(index)}
+                    className={styles.pAndi}
+                  >
+                    {item.initial}
+                  </p>
+                </a>
+                <div ref={iconRefs.current[index]} className={styles.icon}>
+                  {item.icon}
                 </div>
-
-            ))}
-            <div className={styles.copyright}>
-            <p>© 2025 SHIVIRA</p>
+              </div>
             </div>
-       </div>
+          ))}
+          <div className={styles.copyright}>
+            <p>© 2025 SHIVIRA</p>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+});
+
+// PropTypes for type checking
+Contact.propTypes = {
+  ref: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
+  ]),
+};
+
+// Display name for debugging
+Contact.displayName = "Contact";
+
+export default Contact;

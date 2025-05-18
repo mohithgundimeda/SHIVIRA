@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useCallback, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
-import styles from "../Styles/DCard.module.css";
-import Lenis from "lenis/dist/lenis";
-import debounce from "lodash/debounce";
-import destinations from "./DestinationsData";
-import CardMobile from "./DCardMobile";
-import { useIsMobile } from "./useIsMobile";
-import ImageWithSkeleton from "./ImageWithSkeleton";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import styles from '../Styles/DCard.module.css';
+import Lenis from 'lenis/dist/lenis';
+import destinations from './DestinationsData';
+import CardMobile from './DCardMobile';
+import { useIsMobile } from './useIsMobile';
+import ImageWithSkeleton from './ImageWithSkeleton';
 import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import EmojiTransportationOutlinedIcon from '@mui/icons-material/EmojiTransportationOutlined';
@@ -15,12 +14,83 @@ import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 
 // Constants centralized for easy maintenance
 const CONFIG = {
-  LOGO_SRC: "../static/logo4.png",
-  FALLBACK_IMAGE: "../static/logo4.png",
-  RESIZE_TIMEOUT: 2000,
-  FORCE_RESIZE_TIMEOUT: 1000,
+  LOGO_SRC: '../static/logo4.png',
+  FALLBACK_IMAGE: '../static/logo4.png',
   DEBOUNCE_DELAY: 100,
-  TITLE_COLOR_DEBOUNCE: 50,
+  LENIS_OPTIONS: {
+    direction: 'horizontal',
+    orientation: 'horizontal',
+    smoothWheel: true,
+    lerp: 0.1, // Smoother scrolling
+    wheelMultiplier: 0.8, // Reduced for less abrupt stops
+    infinite: false,
+    autoResize: true,
+  },
+  SESSION_STORAGE_KEYS: {
+    SCROLL_RESET: 'dCardScrollReset',
+    PREVIEW_SHOWN: 'dCardPreviewShown',
+    IMAGE_ERRORS: 'dCardImageErrors',
+  },
+  FONTS: {
+    KABUR: '"Kabur"',
+    SABUR: '"sabur"',
+    QUICKSAND: '"Quicksand", sans-serif',
+    JOST: '"Jost", sans-serif',
+  },
+};
+
+// Lightweight debounce implementation
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+
+// Utility for logging in development only
+const logError = (message) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(`[DCard] ${message}`);
+  }
+};
+
+// sessionStorage utilities
+const hasErrorLogged = (imageSrc) => {
+  if (typeof window === 'undefined') return false;
+  const errors = JSON.parse(sessionStorage.getItem(CONFIG.SESSION_STORAGE_KEYS.IMAGE_ERRORS) || '[]');
+  return errors.includes(imageSrc);
+};
+
+const logImageError = (imageSrc) => {
+  if (typeof window === 'undefined') return;
+  const errors = JSON.parse(sessionStorage.getItem(CONFIG.SESSION_STORAGE_KEYS.IMAGE_ERRORS) || '[]');
+  if (!errors.includes(imageSrc)) {
+    errors.push(imageSrc);
+    sessionStorage.setItem(CONFIG.SESSION_STORAGE_KEYS.IMAGE_ERRORS, JSON.stringify(errors));
+  }
+};
+
+const hasScrollReset = () => {
+  if (typeof window === 'undefined') return false;
+  return sessionStorage.getItem(CONFIG.SESSION_STORAGE_KEYS.SCROLL_RESET) === 'true';
+};
+
+const setScrollReset = () => {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(CONFIG.SESSION_STORAGE_KEYS.SCROLL_RESET, 'true');
+  }
+};
+
+const hasPreviewShown = () => {
+  if (typeof window === 'undefined') return false;
+  return sessionStorage.getItem(CONFIG.SESSION_STORAGE_KEYS.PREVIEW_SHOWN) === 'true';
+};
+
+const setPreviewShown = () => {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(CONFIG.SESSION_STORAGE_KEYS.PREVIEW_SHOWN, 'true');
+  }
 };
 
 /**
@@ -39,137 +109,156 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
   const containerRef = useRef(null);
   const brandRef = useRef(null);
   const previewImgRef = useRef(null);
+  const nextButtonRef = useRef(null);
   const lenisRef = useRef(null);
   const isMobile = useIsMobile();
-  const errorLogged = useRef(new Set());
+  const [previewImageSrc, setPreviewImageSrc] = useState(CONFIG.FALLBACK_IMAGE);
 
-  
+  // Memoize final props
   const finalProps = useMemo(() => {
     const cardProps = location.state || {};
     return {
-      countryName: cardProps.countryName || countryName,
-      regionName: cardProps.regionName || regionName,
-      placeName: cardProps.placeName || placeName,
-      images: cardProps.images || images,
+      countryName: cardProps.countryName || countryName || 'Unknown Country',
+      regionName: cardProps.regionName || regionName || 'Unknown Region',
+      placeName: cardProps.placeName || placeName || 'Unknown Place',
+      images: cardProps.images || images || [],
       idx: cardProps.idx !== undefined ? cardProps.idx : idx,
     };
   }, [location.state, countryName, regionName, placeName, images, idx]);
 
-  
-
-  
+  // Memoize grouped images
   const groupedImages = useMemo(() => {
     const imageMap = new Map();
     finalProps.images.forEach((src) => {
-      const match = src.match(/[^/]+(\d+)\.(webp|jpg)$/);
+      const parts = src.split('/');
+      const fileName = parts[parts.length - 1];
+      const match = fileName.match(/^[^1-9]+(\d+)\.(webp|jpg)$/);
       if (match) {
         const imageNum = match[1];
-        const sizeMatch = src.match(/-webp-([^/]+)/) || src.match(/-jpg-([^/]+)/);
-        const size = sizeMatch ? sizeMatch[1] : "large";
-        const format = src.endsWith(".webp") ? "webp" : "jpg";
+        const size = parts[parts.length - 2].split('-').pop();
+        const format = match[2];
 
         if (!imageMap.has(imageNum)) {
-          imageMap.set(imageNum, { small: {}, medium: {}, large: {}});
+          imageMap.set(imageNum, { small: {}, medium: {}, large: {} });
         }
-        if (!imageMap.get(imageNum)[size][format]) {
-          imageMap.get(imageNum)[size][format] = src;
-        }
+        imageMap.get(imageNum)[size][format] = src;
       }
     });
 
-    return Array.from(imageMap.entries()).map(([_, sizes]) => ({
+    return Array.from(imageMap.values()).map((sizes) => ({
       small: { webp: sizes.small.webp, jpg: sizes.small.jpg },
       medium: { webp: sizes.medium.webp, jpg: sizes.medium.jpg },
       large: { webp: sizes.large.webp, jpg: sizes.large.jpg },
     }));
   }, [finalProps.images]);
 
+  // Memoize destination highlights
   const destinationHighlights = useMemo(() => {
-    const destination = destinations.find(d => d.placeName.toLowerCase() === finalProps.placeName.toLowerCase());
+    const destination = destinations.find(
+      (d) => d.placeName.toLowerCase() === finalProps.placeName.toLowerCase()
+    );
     return destination ? destination.highlights : [];
   }, [finalProps.placeName]);
 
-  
-  const takeToNext = useCallback(
-    (nextIdx) => {
-      const destination = destinations[nextIdx];
-      if (!destination) return;
+  // Memoize next destination for preview image
+  const nextDestination = useMemo(() => {
+    const nextIdx = finalProps.idx === destinations.length - 1 ? 0 : finalProps.idx + 1;
+    return destinations[nextIdx];
+  }, [finalProps.idx]);
 
-      const sizes = ["small", "medium", "large"];
-      const basePath = `/static/destinations/${destination.folder}`;
-      const cardProps = {
-        countryName: destination.countryName,
-        regionName: destination.regionName,
-        placeName: destination.placeName,
-        idx: nextIdx,
-        images: Array.from({ length: destination.imageCount }, (_, i) => {
-          const imageNum = i + 1;
-          return sizes.flatMap((size) => [
-            `${basePath}/${destination.folder}-webp/${destination.folder}-webp-${size}/${destination.folder}${imageNum}.webp`,
-            `${basePath}/${destination.folder}-jpg/${destination.folder}-jpg-${size}/${destination.folder}${imageNum}.jpg`,
-          ]);
-        }).flat(),
-      };
-      navigate(`/Destinations/${destination.placeName}`, { state: cardProps });
+  // Navigation to next destination
+  const takeToNext = useCallback(() => {
+    const nextIdx = finalProps.idx === destinations.length - 1 ? 0 : finalProps.idx + 1;
+    const destination = destinations[nextIdx];
+    if (!destination) {
+      logError(`No destination found at index ${nextIdx}`);
+      return;
+    }
+
+    const sizes = ['small', 'medium', 'large'];
+    const basePath = `/static/destinations/${destination.folder}`;
+    const cardProps = {
+      countryName: destination.countryName,
+      regionName: destination.regionName,
+      placeName: destination.placeName,
+      idx: nextIdx,
+      images: Array.from({ length: destination.imageCount || 0 }, (_, i) => {
+        const imageNum = i + 1;
+        return sizes.flatMap((size) => [
+          `${basePath}/${destination.folder}-webp/${destination.folder}-webp-${size}/${destination.folder}${imageNum}.webp`,
+          `${basePath}/${destination.folder}-jpg/${destination.folder}-jpg-${size}/${destination.folder}${imageNum}.jpg`,
+        ]);
+      }).flat(),
+    };
+    navigate(`/Destinations/${destination.placeName}`, { state: cardProps });
+  }, [navigate, finalProps.idx]);
+
+  // Handle image errors
+  const handleImageError = useCallback(
+    (e, imageSrc, imageDescription) => {
+      if (!hasErrorLogged(imageSrc)) {
+        logError(`Failed to load ${imageDescription}: ${imageSrc}`);
+        logImageError(imageSrc);
+      }
+      e.target.src = CONFIG.FALLBACK_IMAGE;
+      e.target.onerror = null;
     },
-    [navigate]
+    []
   );
 
-  //Lenis for smooth horizontal scrolling
+  // Handle preview image error
+  const handlePreviewImageError = useCallback(
+    (e) => {
+      handleImageError(e, previewImageSrc, 'preview image');
+      setPreviewImageSrc(CONFIG.FALLBACK_IMAGE);
+    },
+    [previewImageSrc, handleImageError]
+  );
+
+  // Lenis for smooth horizontal scrolling
   useEffect(() => {
-    if (isMobile || !containerRef.current) {
-      console.debug("Skipping Lenis: Mobile or containerRef is null");
+    if (isMobile || !containerRef.current || typeof window === 'undefined') {
       return;
     }
 
     const contentElement = containerRef.current.querySelector(`.${styles.content}`);
     if (!contentElement) {
-      console.warn("Content element not found, skipping Lenis initialization");
+      logError('Content element not found, skipping Lenis initialization');
       return;
     }
-    console.debug("Initializing Lenis with content:", contentElement);
 
     const lenis = new Lenis({
       wrapper: containerRef.current,
       content: contentElement,
-      direction: "horizontal",
-      orientation: "horizontal",
-      smoothWheel: true,
-      lerp: 0.05,
-      wheelMultiplier: 1,
-      infinite: false,
-      autoResize: true,
+      ...CONFIG.LENIS_OPTIONS,
     });
     lenisRef.current = lenis;
 
-    const updateDimensions = () => {
-      const images = containerRef.current.querySelectorAll("img");
-      if (!images.length) {
-        console.debug("No images found, skipping resize");
-        return;
-      }
-      console.debug("Images found:", images.length);
-
-      const timeout = setTimeout(() => lenis.resize(), CONFIG.RESIZE_TIMEOUT);
-
-      Promise.all(
-        Array.from(images).map((img) => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-          });
-        })
-      )
-        .then(() => {
-          clearTimeout(timeout);
-          lenis.resize();
-        })
-        .catch((err) => {
-          console.error("Image loading error:", err);
-          lenis.resize();
+    // Lazy load images with IntersectionObserver
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+            }
+            lenis.resize();
+            observer.unobserve(entry.target);
+          }
         });
-    };
+      },
+      { rootMargin: '200px' }
+    );
+
+    const images = containerRef.current.querySelectorAll('img');
+    if (!images.length) {
+      logError('No images found, initializing Lenis without resize');
+      lenis.resize();
+    } else {
+      images.forEach((img) => observer.observe(img));
+    }
 
     const raf = (time) => {
       lenis.raf(time);
@@ -177,119 +266,113 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
     };
     const rafId = requestAnimationFrame(raf);
 
-    const handleResize = debounce(updateDimensions, CONFIG.DEBOUNCE_DELAY);
+    const handleResize = debounce(() => {
+      lenis.resize();
+    }, CONFIG.DEBOUNCE_DELAY);
 
-    window.addEventListener("resize", handleResize);
-    updateDimensions();
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
-      window.removeEventListener("resize", handleResize);
-      handleResize.cancel();
+      window.removeEventListener('resize', handleResize);
+      // handleResize.cancel();
+      images.forEach((img) => observer.unobserve(img));
+      observer.disconnect();
     };
   }, [isMobile]);
 
-  // Force resize after initial load
+  // Handle scroll reset and preview image
   useEffect(() => {
-    if (isMobile || !lenisRef.current) return;
-
-    const forceResize = setTimeout(() => lenisRef.current.resize(), CONFIG.FORCE_RESIZE_TIMEOUT);
-    return () => clearTimeout(forceResize);
-  }, [isMobile]);
-
-  // Handle title color effect, preview image, and scroll reset on navigation
-  useEffect(() => {
-    if (isMobile || !location.state || !containerRef.current || !lenisRef.current) {
-      if (!location.state) navigate("/");
+    if (isMobile || !containerRef.current || !lenisRef.current || typeof window === 'undefined') {
       return;
     }
 
-    const resetScroll = () => lenisRef.current.scrollTo(0, { immediate: true });
-    const timeout = setTimeout(resetScroll, 0);
+    // Reset scroll on route change
+    const resetScroll = () => {
+      lenisRef.current.scrollTo(0, { immediate: true });
+      if (!hasScrollReset()) {
+        setScrollReset();
+      }
+    };
+    resetScroll();
 
-    const updateTitleColor = debounce(() => {
-      const title = brandRef.current;
-      if (!title) return;
-
-      const rect = title.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      let [r, g, b] = [255, 255, 255];
-
-      const imgs = containerRef.current.querySelectorAll("img");
-      imgs.forEach((img) => {
-        const imgRect = img.getBoundingClientRect();
-        if (x >= imgRect.left && x <= imgRect.right && y >= imgRect.top && y <= imgRect.bottom) {
-          const canvas = document.createElement("canvas");
-          canvas.width = canvas.height = 1;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, x - imgRect.left, y - imgRect.top, 1, 1, 0, 0, 1, 1);
-          [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        }
-      });
-
-      title.style.color = `rgb(${255 - r}, ${255 - g}, ${255 - b})`;
-    }, CONFIG.TITLE_COLOR_DEBOUNCE);
-
-    lenisRef.current.on("scroll", updateTitleColor);
-    updateTitleColor();
+   
+    if (nextDestination){
+      const basePath = `/static/destinations/${nextDestination.folder}`;
+      const previewSrc = `${basePath}/${nextDestination.folder}-jpg/${nextDestination.folder}-jpg-large/${nextDestination.folder}1.jpg`;
+      setPreviewImageSrc(previewSrc);
+    }
 
     const nextElement = containerRef.current.querySelector(`.${styles.next}`);
     const previewImg = previewImgRef.current;
+    if (!nextElement || !previewImg) return;
+
+    
+    // const shouldShowPreview = !hasPreviewShown();
     const showPreview = (e) => {
-      previewImg.style.display = "block";
+      // if (!shouldShowPreview) return;
+      previewImg.style.display = 'block';
       previewImg.style.left = `${e.clientX + 10}px`;
       previewImg.style.top = `${e.clientY + 10}px`;
+      setPreviewShown();
     };
     const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
     const movePreview = (e) => {
-      previewImg.style.left = `${clamp(e.clientX + 10, 0, window.innerWidth - previewImg.width)}px`;
-      previewImg.style.top = `${clamp(e.clientY + 10, 0, window.innerHeight - previewImg.height)}px`;
+      // if (!shouldShowPreview) return;
+      previewImg.style.left = `${clamp(e.clientX + 10, 0, window.innerWidth - previewImg.offsetWidth)}px`;
+      previewImg.style.top = `${clamp(e.clientY + 10, 0, window.innerHeight - previewImg.offsetHeight)}px`;
     };
-    const hidePreview = () => (previewImg.style.display = "none");
+    const hidePreview = () => {
+      previewImg.style.display = 'none';
+    };
 
-    if (nextElement) {
-      nextElement.addEventListener("mouseenter", showPreview);
-      nextElement.addEventListener("mousemove", movePreview);
-      nextElement.addEventListener("mouseleave", hidePreview);
-    }
+    nextElement.addEventListener('mouseenter', showPreview, { passive: true });
+    nextElement.addEventListener('mousemove', movePreview, { passive: true });
+    nextElement.addEventListener('mouseleave', hidePreview, { passive: true });
+
+    // Focus management for accessibility
+    const handleFocus = () => {
+      nextElement.focus();
+    };
+    nextElement.addEventListener('focus', handleFocus);
 
     return () => {
-      clearTimeout(timeout);
-      updateTitleColor.cancel();
-      if (nextElement) {
-        nextElement.removeEventListener("mouseenter", showPreview);
-        nextElement.removeEventListener("mousemove", movePreview);
-        nextElement.removeEventListener("mouseleave", hidePreview);
-      }
+      nextElement.removeEventListener('mouseenter', showPreview);
+      nextElement.removeEventListener('mousemove', movePreview);
+      nextElement.removeEventListener('mouseleave', hidePreview);
+      nextElement.removeEventListener('focus', handleFocus);
     };
-  }, [isMobile, location.state, navigate, takeToNext, location.pathname]);
+  }, [isMobile, location.pathname, nextDestination]);
 
   // Early returns for invalid cases
   if (!groupedImages || groupedImages.length === 0) {
-    return <div className={styles.error}>No valid images provided</div>;
+    return (
+      <div className={styles.error} role="alert" aria-live="assertive">
+        No valid images provided
+      </div>
+    );
+  }
+
+  if (!location.state) {
+    return (
+      <div className={styles.error} role="alert" aria-live="assertive">
+        Invalid destination data. Please select a destination.
+      </div>
+    );
   }
 
   if (isMobile) {
     return <CardMobile {...finalProps} />;
   }
 
-  // Helper function to handle image errors
-  const handleImageError = (e, imageSrc, imageDescription) => {
-    if (!errorLogged.current.has(imageSrc)) {
-      console.error(`Failed to load ${imageDescription}: ${imageSrc}`);
-      errorLogged.current.add(imageSrc);
-    }
-    e.target.src = CONFIG.FALLBACK_IMAGE;
-    e.target.onerror = null;
-  };
-
   return (
-    <div>
-      <div ref={brandRef} className={styles.brand}>SHIVIRA</div>
-      <div ref={containerRef} className={styles.container}>
+    <div className={styles.cardWrapper}>
+      <div ref={brandRef} className={styles.brand} aria-label="SHIVIRA logo">
+        SHIVIRA
+      </div>
+      <div ref={containerRef} className={styles.container} role="region" aria-label="Destination details">
         <div className={styles.content}>
           <div className={styles.intro}>
             <div className={styles.display}>
@@ -298,152 +381,166 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
                 <div className={styles.region}>{finalProps.regionName}</div>
               </div>
               <div className={styles.placeName}>{finalProps.placeName.toUpperCase()}</div>
-              <button className={styles.itinerary}>BOOK NOW</button>
+              <button
+                className={styles.itinerary}
+                aria-label={`Book now for ${finalProps.placeName}`}
+                onClick={() => logError('Booking functionality not implemented')}
+              >
+                BOOK NOW
+              </button>
             </div>
           </div>
           <div className={styles.mainImage}>
             <ImageWithSkeleton
-                src={groupedImages[0].large.jpg || CONFIG.FALLBACK_IMAGE}
-                alt={`${finalProps.placeName}`}
-                className={styles.image1}
-                sources={[
-                  {
-                    media: "(max-width: 480px)",
-                    srcSet: groupedImages[0].small.webp || groupedImages[0].small.jpg,
-                    type: "image/webp",
-                  },
-                  {
-                    media: "(max-width: 480px)",
-                    srcSet: groupedImages[0].small.jpg,
-                    type: "image/jpeg",
-                  },
-                  {
-                    media: "(max-width: 768px)",
-                    srcSet: groupedImages[0].medium.webp || groupedImages[0].medium.jpg,
-                    type: "image/webp",
-                  },
-                  {
-                    media: "(max-width: 768px)",
-                    srcSet: groupedImages[0].medium.jpg,
-                    type: "image/jpeg",
-                  },
-                  {
-                    media: "(min-width: 768px)",
-                    srcSet: groupedImages[0].large.webp || groupedImages[0].large.jpg,
-                    type: "image/webp",
-                  },
-                  {
-                    media: "(min-width: 768px)",
-                    srcSet: groupedImages[0].large.jpg,
-                    type: "image/jpeg",
-                  },
-                ]}
-                onError={(e) =>
-                  handleImageError(e, groupedImages[0].large.jpg || CONFIG.FALLBACK_IMAGE, `main image for ${finalProps.placeName}`)
-                }
-                loading="lazy"
-                decoding="async"
-              />
+              src={groupedImages[0].large.jpg || CONFIG.FALLBACK_IMAGE}
+              
+              alt={`Main image of ${finalProps.placeName}`}
+              className={styles.image1}
+              sources={[
+                {
+                  media: '(max-width: 480px)',
+                  srcSet: groupedImages[0].small.webp || groupedImages[0].small.jpg,
+                  type: 'image/webp',
+                },
+                {
+                  media: '(max-width: 480px)',
+                  srcSet: groupedImages[0].small.jpg,
+                  type: 'image/jpeg',
+                },
+                {
+                  media: '(max-width: 768px)',
+                  srcSet: groupedImages[0].medium.webp || groupedImages[0].medium.jpg,
+                  type: 'image/webp',
+                },
+                {
+                  media: '(max-width: 768px)',
+                  srcSet: groupedImages[0].medium.jpg,
+                  type: 'image/jpeg',
+                },
+                {
+                  media: '(min-width: 768px)',
+                  srcSet: groupedImages[0].large.webp || groupedImages[0].large.jpg,
+                  type: 'image/webp',
+                },
+                {
+                  media: '(min-width: 768px)',
+                  srcSet: groupedImages[0].large.jpg,
+                  type: 'image/jpeg',
+                },
+              ]}
+              onError={(e) =>
+                handleImageError(e, groupedImages[0].large.jpg || CONFIG.FALLBACK_IMAGE, `main image for ${finalProps.placeName}`)
+              }
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           {groupedImages.length > 1 && (
             <div className={styles.sideImages}>
               {groupedImages.slice(1).map((image, idx) => (
                 <div key={`${finalProps.placeName}-${idx}`} className={styles.sideImageWrapper}>
-                 
-                 <ImageWithSkeleton
+                  <ImageWithSkeleton
                     src={image.large.jpg || CONFIG.FALLBACK_IMAGE}
-                    alt={`${idx + 1} of ${finalProps.placeName}`}
+                    alt={`Image ${idx + 1} of ${finalProps.placeName}`}
                     className={styles.virus}
                     sources={[
                       {
-                        media: "(max-width: 480px)",
+                        media: '(max-width: 480px)',
                         srcSet: image.small.webp || image.small.jpg,
-                        type: "image/webp",
+                        type: 'image/webp',
                       },
                       {
-                        media: "(max-width: 480px)",
+                        media: '(max-width: 480px)',
                         srcSet: image.small.jpg,
-                        type: "image/jpeg",
+                        type: 'image/jpeg',
                       },
                       {
-                        media: "(max-width: 768px)",
+                        media: '(max-width: 768px)',
                         srcSet: image.medium.webp || image.medium.jpg,
-                        type: "image/webp",
+                        type: 'image/webp',
                       },
                       {
-                        media: "(max-width: 768px)",
-                        srcSet: image.medium.jpg,
-                        type: "image/jpeg",
+                        media: '(max-width: 768px)',
+                        srcSet: image.small.jpg,
+                        type: 'image/jpeg',
                       },
                       {
-                        media: "(min-width: 768px)",
+                        media: '(min-width: 769px)',
                         srcSet: image.large.webp || image.large.jpg,
-                        type: "image/webp",
+                        type: 'image/webp',
                       },
                       {
-                        media: "(min-width: 768px)",
+                        media: '(min-width: 769px)',
                         srcSet: image.large.jpg,
-                        type: "image/jpeg",
+                        type: 'image/jpeg',
                       },
                     ]}
                     onError={(e) =>
-                      handleImageError(e, image.large.jpg || CONFIG.FALLBACK_IMAGE, `${idx + 1} for ${finalProps.placeName}`)
+                      handleImageError(e, image.large.jpg || CONFIG.FALLBACK_IMAGE, `image ${idx + 1} for ${finalProps.placeName}`)
                     }
                     loading="lazy"
                     decoding="async"
                   />
-
                 </div>
               ))}
-
-                <div key="highlights" className={styles.highlightsWrapper}>
-                  <div className={styles.highlightsBlock}>
-                      <p className={styles.highlightsTitle}>HIGHLIGHTS</p>
-
-                      <ul className={styles.highlightsList}>
-                        <div>
-                        {destinationHighlights.map((highlight, i) => (
-                          <li key={`highlight-${i}`} className={styles.highlightItem}>
-                            <img src="/static/logo4.png"alt="pointer" loading="lazy" style={{rotate:'-90deg', width:'1rem', height:'1rem'}}/>{highlight}
-                          </li>
-                        ))}
-                        </div>
-                      </ul>
-                    
-                      <p className={styles.inclusionTitle}>INCLUSIONS</p>
-                      <div className={styles.icons}>
-
-                        <div className={styles.iconsContainer}>
-                          <ApartmentOutlinedIcon className={styles.icon}/>  
-                          <p className={styles.iconText}>ACCOMMODATION</p>
-                        </div>
-                        <div className={styles.iconsContainer}>
-                        <RemoveRedEyeOutlinedIcon className={styles.icon}/>
-                        <p className={styles.iconText}>SIGHTSEEING</p>
-                        </div>
-                        <div className={styles.iconsContainer}>
-                        <EmojiTransportationOutlinedIcon className={styles.icon}/>
-                        <p className={styles.iconText} >TRANSPORT</p>
-                        </div>
-                        <div className={styles.iconsContainer}>
-                        <SupportAgentOutlinedIcon className={styles.icon}/> 
-                        <p className={styles.iconText} >SEAMLESS SUPPORT</p>
-                        </div>
-
-                      </div>
-                      
+              <div key="highlights" className={styles.highlightsWrapper}>
+                <div className={styles.highlightsBlock}>
+                  <p className={styles.highlightsTitle} id="highlights-title">
+                    HIGHLIGHTS
+                  </p>
+                  <ul
+                    className={styles.highlightsList}
+                    aria-live="polite"
+                    aria-describedby="highlights-title"
+                  >
+                    {destinationHighlights.map((highlight, i) => (
+                      <li key={`highlight-${i}`} className={styles.highlightItem}>
+                        <img
+                          src="/static/logo4.png"
+                          alt="Highlight pointer"
+                          className={styles.highlightPointer}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className={styles.inclusionTitle}>INCLUSIONS</p>
+                  <div className={styles.icons}>
+                    <div className={styles.iconsContainer}>
+                      <ApartmentOutlinedIcon className={styles.icon} aria-hidden="true" />
+                      <p className={styles.iconText}>ACCOMMODATION</p>
+                    </div>
+                    <div className={styles.iconsContainer}>
+                      <RemoveRedEyeOutlinedIcon className={styles.icon} aria-hidden="true" />
+                      <p className={styles.iconText}>SIGHTSEEING</p>
+                    </div>
+                    <div className={styles.iconsContainer}>
+                      <EmojiTransportationOutlinedIcon className={styles.icon} aria-hidden="true" />
+                      <p className={styles.iconText}>TRANSPORT</p>
+                    </div>
+                    <div className={styles.iconsContainer}>
+                      <SupportAgentOutlinedIcon className={styles.icon} aria-hidden="true" />
+                      <p className={styles.iconText}>SEAMLESS SUPPORT</p>
+                    </div>
                   </div>
                 </div>
-
+              </div>
               <div className={styles.nextWrapper}>
                 <p
+                  ref={nextButtonRef}
                   className={styles.next}
                   tabIndex={0}
                   role="button"
-                  onClick={() => takeToNext(finalProps.idx === destinations.length - 1 ? 0 : finalProps.idx + 1)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && takeToNext(finalProps.idx === destinations.length - 1 ? 0 : finalProps.idx + 1)
-                  }
+                  aria-label={`Navigate to next location: ${nextDestination?.placeName || 'Next'}`}
+                  onClick={takeToNext}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      takeToNext();
+                    }
+                  }}
                 >
                   NEXT LOCATION
                 </p>
@@ -454,11 +551,13 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
       </div>
       <img
         ref={previewImgRef}
-        src={CONFIG.LOGO_SRC}
-        alt="Hover preview"
+        src={previewImageSrc}
+        alt="Preview of next destination"
         className={styles.previewImage}
         loading="lazy"
         decoding="async"
+        aria-hidden={!hasPreviewShown()}
+        onError={handlePreviewImageError}
       />
     </div>
   );
@@ -477,7 +576,36 @@ Card.defaultProps = {
   idx: 0,
 };
 
+Card.displayName = 'Card';
 
-Card.displayName = "Card";
+// Error boundary component
+class CardErrorBoundary extends React.Component {
+  state = { hasError: false };
 
-export default Card;
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    logError(`Error in Card component: ${error}, Info: ${info.componentStack}`);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className={styles.error} role="alert" aria-live="assertive">
+          An error occurred while displaying the destination. Please try again.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const DCardWithErrorBoundary = (props) => (
+  <CardErrorBoundary>
+    <Card {...props} />
+  </CardErrorBoundary>
+);
+
+export default DCardWithErrorBoundary;

@@ -1,200 +1,245 @@
-import React, {useMemo, useCallback, useRef, useEffect, useState} from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Skeleton from "@mui/material/Skeleton"; 
+import React, { useMemo, useCallback, useRef, useState, useEffect } from "react";
+import Skeleton from "@mui/material/Skeleton";
 import styles from "../Styles/SlideShowTrending.module.css";
 import { useIsMobile } from "./useIsMobile";
-
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
-export default function SlideShowTrending( {pinComplete, pinnedContainer}) {
 
-    const slideShowRef = useRef(null);
-    const containerRef = useRef(null);
-    const imageRefs = useRef([]);
-    const [loadedImages, setLoadedImages] = useState({});
-    const isMobile = useIsMobile();
+const STAGGER_DELAY = 0.1;
+const ANIMATION_Y = 200;
+const ANIMATION_DURATION = 0.5;
+const BREAKPOINTS = {
+  MOBILE: 600,
+  TABLET: 770,
+};
 
-    const captions = useMemo(
-      () => ["Jagdalpur, india", "paris, france", "rhode island, usa", "alpbach, austria", "Göreme, turkey", "sahara desert, north africa"],
-      []
-    );
-    const images = useMemo(()=>['waterfallB&W', 'eiffelTower', 'boatOcean', 'snowHouse','hotairbaloon', 'desert'],[]);
-    const sizes = useMemo(() => ["small", "medium", 'large'], []);
 
-      const groupedImages = useMemo(() => {
-        return images.map((name) => {
-          const imageObj = { alt: name};
-          sizes.forEach((size) => {
-            imageObj[size] = {
-              // webp: `/static/trending/trending-${size}/trending-${size}-webp/slideshow/${name}.webp`,
-              jpg: `/static/trending/trending-${size}/trending-${size}-jpg/slideshow/${name}.jpg`,
-            };
-          });
-          return imageObj;
-        });
-      }, [images,sizes]);
 
-      const handleImageLoad = useCallback((index) => {
-        setLoadedImages((prev) => ({ ...prev, [index]: true }));
-      }, []);
-    
+const SLIDE_DATA = [
+  { name: "goldenbridge", caption: "Da Nang, Vietnam" },
+  { name: "hotairbaloon", caption: "Göreme, Turkey" },
+  { name: "waterfallB&W", caption: "Jagdalpur, India" },
+  { name: "eiffelTower", caption: "Paris, France" },
+  { name: "boatOcean", caption: "Rhode Island, USA" },
+];
 
-    const handleImageError = useCallback((e, src) => {
-      console.error(`Failed to load image: ${src}`);
-      setLoadedImages((prev) => ({ ...prev, [e.target.dataset.index]: true }));
-    }, []);
 
-    useEffect(() => {
+const getImagePath = (name, size) => `/static/trending/trending-${size}/trending-${size}-jpg/slideshow/${name}.jpg`;
 
-      if(!slideShowRef.current || !containerRef.current || !pinComplete) return;
 
-      const ctx = gsap.context(() => {
-      const slideShow = slideShowRef.current;
-      const container = containerRef.current;
-      const totalWidth = slideShow.scrollWidth;
-      const viewportWidth = window.innerWidth;
-      const scrollDistance = totalWidth - viewportWidth;
-      
-      if (scrollDistance <= 0) {
-        console.warn("SlideShow content is smaller than viewport, skipping animation");
-        return;
-      }
-  
-      if (isMobile) {        
-          gsap.to(slideShow, {
-            x: -scrollDistance,
-            ease: "power1.inOut",
-            scrollTrigger: {
-              trigger: container,
-              start: "top bottom-=300px",
-              end: `+=500px`,
-              scrub: 5,
-            },
-          });
-      } else {
-          
-          const verticalScrollDistance = window.innerHeight * (scrollDistance / viewportWidth);
-    
-          gsap.to(slideShow, {
-            x: -scrollDistance,
-            ease: "power1.inOut",
-            scrollTrigger: {
-              trigger: container,
-              start: "center center",
-              end: `+=${verticalScrollDistance}`,
-              scrub: 1,
-              pin: true,
-              refreshPriority:3,
-              anticipatePin: 1,
-              pinSpacing: true,
-              invalidateOnRefresh: true,
-            },
-          });
+const FALLBACK_IMAGE = "/static/logo4.png";
 
-      }
+class SlideShowErrorBoundary extends React.Component {
+  state = { hasError: false };
 
-    }, containerRef.current);
-  
-      return () => {
-        ctx.revert();
-      };
-    }, [slideShowRef, containerRef, pinComplete, isMobile]);
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
 
-    if (groupedImages.length === 0) {
-      return (
-        <div className={styles.container}>
-          <p>No images available</p>
-        </div>
-      );
+  componentDidCatch(error) {
+    console.error("SlideShowTrending Error:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div className={styles.emptyContainer}>Failed to load slideshow</div>;
     }
-    
-    
-    return(
-        <div ref={containerRef} className={styles.container}>
-             <div ref={slideShowRef} className={styles.slideShow}>
-             {groupedImages.map((image, index) => {
-              const isImageLoaded = !!loadedImages[index];
-
-          return (
-            <div
-              key={index}
-              ref={(el) => (imageRefs.current[index] = el)}
-              className={styles.imageContainer}
-              data-caption={captions[index].toUpperCase() || "Caption unavailable"}
-            >
-              <picture>
-              {/* <source media="(min-width: 1020px)" srcSet={image.large.webp} type="image/webp" /> */}
-              <source media="(min-width: 1020px)" srcSet={image.large.jpg} type="image/jpeg" />
-              {/* <source media="(min-width: 601px)" srcSet={image.medium.webp} type="image/webp" /> */}
-              <source media="(min-width: 601px)" srcSet={image.medium.jpg} type="image/jpeg" />
-              {/* <source media="(max-width: 600px)" srcSet={image.small.webp} type="image/webp" /> */}
-              <source media="(max-width: 600px)" srcSet={image.small.jpg} type="image/jpeg" />
-               <img
-                  src={image.large.jpg}
-                  alt={image.alt}
-                  loading="lazy"
-                  decoding="async"
-                  onLoad={() => handleImageLoad(index)}
-                  className={styles.slideShowImages}
-                  onError={(e) => handleImageError(e, image.large.jpg)}
-                  style={{ opacity: isImageLoaded ? 1 : 0, transition: "opacity 0.3s" }}
-                />
-              </picture>
-              {!isImageLoaded && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: "#d7d1bf",
-                    zIndex: 100,
-                  }}
-                >
-                  <Skeleton
-                    variant="rectangular"
-                    width="100%"
-                    height="100%"
-                    animation="wave"
-                    style={{ borderRadius: "10px 10px 0px 0px", position: "relative", zIndex: 0 }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "0.5rem",
-                      left: "1rem",
-                      width: "100%",
-                      height: "1.5rem",
-                      zIndex: 1,
-                      display: "flex",
-                      gap:"0.5rem",
-                    }}
-                  >
-                    <Skeleton
-                      variant="text"
-                      width="7rem"
-                      height="100%"
-                      animation="wave"
-                    />
-
-                    <Skeleton
-                      variant="text"
-                      width="7rem"
-                      height="100%"
-                      animation="wave"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-              );
-            })}
-
-            </div>
-
-        </div>
-    );
-
+    return this.props.children;
+  }
 }
+
+// Main Component
+const SlideShowTrending = () => {
+  const imageRefs = useRef([]);
+  const containerRef = useRef(null);
+  const [loadedImages, setLoadedImages] = useState({});
+  const [activeIndex, setActiveIndex] = useState(0);
+  const isMobile = useIsMobile();
+
+  // Preload first image
+  useEffect(() => {
+    const preloadImage = new Image();
+    preloadImage.src = isMobile ? getImagePath(SLIDE_DATA[0].name, "small") : getImagePath(SLIDE_DATA[0].name, "large");
+  }, [isMobile]);
+
+  // Memoized image data
+  const groupedImages = useMemo(() => {
+    if (!SLIDE_DATA.length) return [];
+    return SLIDE_DATA.map(({ name }) => ({
+      alt: `Scenic view of ${name.replace(/([A-Z])/g, " $1").toLowerCase()}`,
+      small: { jpg: getImagePath(name, "small") },
+      medium: { jpg: getImagePath(name, "medium") },
+      large: { jpg: getImagePath(name, "large") },
+    }));
+  }, []);
+
+  // Responsive data
+  const displayData = isMobile ? SLIDE_DATA.slice(0, 4) : SLIDE_DATA;
+
+  // Event handlers
+  const handleImageLoad = useCallback((index) => {
+    setLoadedImages((prev) => ({ ...prev, [index]: true }));
+  }, []);
+
+  const handleImageError = useCallback((e, src) => {
+    console.error(`Failed to load image: ${src}`);
+    e.currentTarget.src = FALLBACK_IMAGE;
+    const index = parseInt(e.currentTarget.dataset.index || "-1", 10);
+    if (index >= 0) {
+      setLoadedImages((prev) => ({ ...prev, [index]: true }));
+    }
+  }, []);
+
+  const handleImageClick = useCallback((index) => {
+    if (isMobile) {
+      setActiveIndex((prev) => (prev === index ? null : index));
+    }
+  }, [isMobile]);
+
+  const handleKeyDown = useCallback((e, index) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleImageClick(index);
+    }
+  }, [handleImageClick]);
+
+  // GSAP Animation for Desktop
+  useEffect(() => {
+    if (isMobile || !containerRef.current) return;
+
+    const imageItems = imageRefs.current.filter((el) => el !== null);
+    if (!imageItems.length) return;
+
+    // Wait for at least one image to load
+    if (!Object.values(loadedImages).some(Boolean)) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        imageItems,
+        { y: ANIMATION_Y },
+        {
+          y: 0,
+          duration: ANIMATION_DURATION,
+          ease: "ease.out",
+          stagger: { each: STAGGER_DELAY, from: "center" },
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: `top bottom-=${ANIMATION_Y}px`,
+            end: "+=50px",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    }, containerRef.current);
+
+    return () => ctx.revert();
+  }, [isMobile, loadedImages]);
+
+  
+  if (!groupedImages.length) {
+    return (
+      <div className={styles.container}>
+        <p className={styles.emptyMessage}>No images available</p>
+      </div>
+    );
+  }
+
+  
+  const imageElements = displayData.map(({ name, caption }, index) => {
+    const isImageLoaded = !!loadedImages[index];
+    const isActive = isMobile && activeIndex === index;
+
+    return (
+      <div
+        key={index}
+        ref={(el) => (imageRefs.current[index] = el)}
+        className={`${styles.imageContainer} ${isActive ? styles.active : ""}`}
+        onClick={() => handleImageClick(index)}
+        onKeyDown={(e) => handleKeyDown(e, index)}
+        role="button"
+        tabIndex={0}
+        aria-label={`Expand image of ${caption}`}
+      >
+        <picture>
+          <source
+            media={`(min-width: ${BREAKPOINTS.TABLET + 1}px)`}
+            srcSet={groupedImages[index].large.jpg}
+            type="image/jpeg"
+          />
+          <source
+            media={`(min-width: ${BREAKPOINTS.MOBILE + 1}px)`}
+            srcSet={groupedImages[index].medium.jpg}
+            type="image/jpeg"
+          />
+          <source
+            media={`(max-width: ${BREAKPOINTS.MOBILE}px)`}
+            srcSet={groupedImages[index].small.jpg}
+            type="image/jpeg"
+          />
+          <img
+            src={groupedImages[index].large.jpg}
+            alt={groupedImages[index].alt}
+            loading={index === 0 ? "eager" : "lazy"}
+            decoding="async"
+            onLoad={() => handleImageLoad(index)}
+            onError={(e) => handleImageError(e, groupedImages[index].large.jpg)}
+            className={styles.slideShowImages}
+            style={{ opacity: isImageLoaded ? 1 : 0, transition: "opacity 0.3s" }}
+            data-index={String(index)}
+          />
+        </picture>
+        <div className={styles.captionOverlay} aria-label={`Location: ${caption}`}>
+          <p className={styles.caption}>{caption.toUpperCase()}</p>
+        </div>
+        {!isImageLoaded && (
+          <div className={styles.skeletonWrapper} aria-hidden="true">
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height="100%"
+              animation="wave"
+              className={styles.skeletonImage}
+            />
+            <div className={styles.skeletonCaption}>
+              <Skeleton variant="text" width="7rem" height="1.5rem" animation="wave" />
+              <Skeleton variant="text" width="7rem" height="1.5rem" animation="wave" />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  });
+
+  
+  if (isMobile) {
+    const rows = [imageElements.slice(0, 2), imageElements.slice(2, 4)];
+    return (
+      <SlideShowErrorBoundary>
+        <div className={styles.container}>
+          <div className={styles.slideShow}>
+            {rows.map((row, rowIndex) => (
+              <div key={rowIndex} className={styles.gridRow}>
+                {row}
+              </div>
+            ))}
+          </div>
+        </div>
+      </SlideShowErrorBoundary>
+    );
+  }
+
+  // Desktop
+  return (
+    <SlideShowErrorBoundary>
+      <div ref={containerRef} className={styles.container}>
+        <div className={styles.slideShow}>{imageElements}</div>
+      </div>
+    </SlideShowErrorBoundary>
+  );
+};
+
+SlideShowTrending.propTypes = {};
+
+export default SlideShowTrending;

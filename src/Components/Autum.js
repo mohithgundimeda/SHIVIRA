@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useMemo, useRef, useEffect, useCallback, forwardRef } from 'react';
 import styles from '../Styles/Autumn.module.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,16 +18,20 @@ const PLACES_DATA = [
 const ASSET_PATH ='/static/autumn';
 
 // Component
-export default function Autumn() {
+const Autum = forwardRef(({...props}, ref)=>{
   const containerRef = useRef(null);
   const backgroundRef = useRef(null);
   const panelRef = useRef([]);
   const bladeRef = useRef([]);
   const imageRef = useRef([]);
   const isInitialized = useRef(false);
-
-  
   const placesData = useMemo(() => PLACES_DATA, []);
+
+     useEffect(() => {
+        if (ref) {
+          ref.current = containerRef.current;
+        }
+      }, [ref]);
 
  
   const groupedImages = useMemo(() => {
@@ -255,4 +259,6 @@ export default function Autumn() {
       <div style={{ zIndex: 1 }}>{panels}</div>
     </div>
   );
-}
+});
+
+export default Autum;

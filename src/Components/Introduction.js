@@ -4,6 +4,8 @@ import styles from "../Styles/Introduction.module.css";
 import { useIsMobile } from "./useIsMobile";
 import { ReactComponent as ShiviraSvg } from "../shivira-optimized.svg";
 
+
+/* make logo animation, ptimize starter.js, remove the stars in the bottom and adjust textRef array */
 const Introduction = ({ onComplete }) => {
   const logoRef = useRef(null);
   const shiviraRef = useRef(null);

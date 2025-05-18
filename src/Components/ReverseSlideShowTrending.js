@@ -7,7 +7,7 @@ import { useIsMobile } from "./useIsMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function ReverseSlideShowTrending({ pinComplete, pinnedContainer }) {
+export default function ReverseSlideShowTrending({ pinComplete}) {
   const slideShowRef = useRef(null);
   const containerRef = useRef(null);
   const imageRefs = useRef([]);
@@ -95,11 +95,11 @@ export default function ReverseSlideShowTrending({ pinComplete, pinnedContainer 
           x: 0,
           ease: "power1.inOut",
           scrollTrigger: {
-            trigger: container,
-            start: "top bottom-=300px",
-            end: `+=500px`,
-            scrub: 5,
-          },
+              trigger: container,
+              start: "top bottom-=200px",
+              end: `top top`,
+              scrub: 1,
+            },
         });
 
 

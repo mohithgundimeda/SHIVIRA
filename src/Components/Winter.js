@@ -1,182 +1,140 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useLayoutEffect, useEffect, useRef, useCallback, forwardRef } from "react";
+import { useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import styles from "../Styles/Winter.module.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Static data
-const WinterPlaces = ["darjeeling", "gangtok", "manali", "shimla", "srinagar"];
-const WinterdaysAndNights = [
-  [[5, 6], [8, 9]],
-  [[5, 6], [8, 9]],
-  [[5, 6], [10, 11]],
-  [[5, 6], [10, 11]],
-  [[4, 5], [6, 7]],
-];
-
-const LOGO_FALLBACK = 'static/logo4.png';
-
-// Component for each place's content
-const PlaceContent = ({ place, index, layerRef, curtonRef, WinterdaysAndNights }) => {
-  return (
-    <div
-      ref={layerRef}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        cursor: "pointer",
-        zIndex: WinterPlaces.length - index,
-      }}
-    >
-      <div className={styles.locationName}>
-        <p>{place.toUpperCase()}</p>
-      </div>
-      <div
-        ref={curtonRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          overflow: "hidden",
-          zIndex: 2,
-          cursor: "default",
-        }}
-      >
-        <img
-          src={`static/winter/${place}/${place}-jpg/${place}-jpg-large/${place}-edited.jpg`}
-          alt={`${place} winter curtain`}
-          className={styles.contentimage}
-          loading="lazy"
-          onError={(e) => {
-            e.target.src = LOGO_FALLBACK;
-            console.error(`Failed to load curtain image for ${place}`);
-          }}
-        />
-      </div>
-      <div className={styles.contentText}>
-        <div className={styles.flex}>
-
-        <p className={styles.duration}>
-          {`${
-            WinterdaysAndNights?.[0]?.[0] || 0
-          }N / ${WinterdaysAndNights?.[0]?.[1] || 0}D`}
-        </p>
-
-        <p className={styles.to}>to</p>
-        
-        <p className={styles.duration}>
-          {`${
-            WinterdaysAndNights?.[1]?.[0] || 0
-          }N / ${WinterdaysAndNights?.[1]?.[1] || 0}D`}
-        </p>
-
-        </div>
-         <button
-            className={styles.seeMore}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                console.log(`See more about ${place}`);
-              }
-            }}
-            aria-label={`See more about ${place}`}
-          >
-            see more
-            <KeyboardArrowRightIcon className={styles.mui}/>
-          </button> 
-          
-
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 0,
-          cursor: "default",
-        }}
-      >
-        <img
-          src={`static/winter/${place}/${place}-jpg/${place}-jpg-large/${place}1.jpg`}
-          alt={`${place} winter background`}
-          className={styles.contentimage}
-          loading="lazy"
-          onError={(e) => {
-            e.target.src = LOGO_FALLBACK;
-            console.error(`Failed to load background image for ${place}`);
-          }}
-        />
-      </div>
-    </div>
-  );
+const CONFIG = {
+  LOGO_FALLBACK: "/static/logo4.png",
+  IMAGE_BASE_PATH: "/static/winter",
+  PLACES: ["darjeeling", "srinagar", "gangtok", "manali", "shimla"],
+  DAYS_NIGHTS: [
+    [[5, 6], [8, 9]],
+    [[5, 6], [8, 9]],
+    [[5, 6], [10, 11]],
+    [[5, 6], [10, 11]],
+    [[4, 5], [6, 7]],
+  ],
 };
 
-PlaceContent.propTypes = {
-  place: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired,
-  layerRef: PropTypes.object.isRequired,
-  curtonRef: PropTypes.object.isRequired,
-  WinterdaysAndNights: PropTypes.array.isRequired,
-};
-
-export default function Winter() {
+const Winter = forwardRef(({ className, ...props }, ref) => {
+  const location = useLocation();
   const containerRef = useRef(null);
   const foreGroundRef = useRef(null);
   const sectionNameRef = useRef(null);
   const introRef = useRef(null);
   const backGroundRef = useRef(null);
-  const WinterContentRef = useRef(null);
-  const curtonRefs = useMemo(() => WinterPlaces.map(() => React.createRef()), []);
-  const layerRefs = useMemo(() => WinterPlaces.map(() => React.createRef()), []);
+  const winterContentRef = useRef(null);
+  const displayImageRef = useRef(null);
+  const displayTextRef = useRef(null);
+  const locationRefs = useRef(CONFIG.PLACES.map(() => React.createRef()));
+  const ctx = useRef(null);
+
+  // Validate data consistency
+  if (CONFIG.PLACES.length !== CONFIG.DAYS_NIGHTS.length) {
+    console.error("[Winter] Mismatch between PLACES and DAYS_NIGHTS arrays");
+  }
+
+  // Forward ref
+  useEffect(() => {
+    if (ref) {
+      ref.current = containerRef.current;
+    }
+  }, [ref]);
+
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const timer = setTimeout(() => ScrollTrigger.refresh(), 100);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
-    const ctx = gsap.context(() => {
+  
+  const handleMouseEnter = useCallback((index) => {
+    if (!displayImageRef.current || !displayTextRef.current) {
+      console.error("[Winter] Missing display refs");
+      return;
+    }
+    const place = CONFIG.PLACES[index];
+    const daysNights = CONFIG.DAYS_NIGHTS[index];
+    if (!place || !daysNights) {
+      console.error(`[Winter] Invalid data at index ${index}`);
+      return;
+    }
+
+    const imagePath = `${CONFIG.IMAGE_BASE_PATH}/${place}/${place}-jpg/${place}-jpg-large/${place}1.jpg`;
+    displayImageRef.current.src = imagePath;
+    displayTextRef.current.textContent = `PACKAGES TYPICALLY RANGE FROM ${daysNights[0][0]}N / ${daysNights[0][1]}D TO ${daysNights[1][0]}N / ${daysNights[1][1]}D, CLICK TO SEE MORE.`;
+  }, []);
+
+
+  useEffect(() => {
+    const locations = locationRefs.current.map((ref) => ref.current).filter(Boolean);
+    if (locations.length === 0) {
+      console.warn("[Winter] No location refs found for event listeners");
+      return;
+    }
+
+    locations.forEach((location, index) => {
+      location.addEventListener("mouseenter", () => handleMouseEnter(index));
+    });
+
+    return () => {
+      locations.forEach((location, index) => {
+        location.removeEventListener("mouseenter", () => handleMouseEnter(index));
+      });
+    };
+  }, [handleMouseEnter]);
+
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) {
+      console.warn("[Winter] containerRef missing");
+      return;
+    }
+
+    ctx.current = gsap.context(() => {
       const mainTl = gsap.timeline();
 
-      // Intro animation
-      try {
-        if (sectionNameRef.current) {
-          mainTl.add(
-            gsap.from(sectionNameRef.current, {
-              y: "100vh",
-              duration: 1,
-              scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top top+=150px",
-                end: "+=100px",
-                scrub: 2,
-                invalidateOnRefresh: true,
-              },
-            })
-          );
-        }
+      
+      if (sectionNameRef.current) {
+        mainTl.from(sectionNameRef.current, {
+          y: "100vh",
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top top+=200px",
+            end: "+=100px",
+            scrub: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+      } else {
+        console.warn("[Winter] sectionNameRef missing");
+      }
 
-        if (introRef.current && foreGroundRef.current && sectionNameRef.current && backGroundRef.current) {
-          mainTl.add(
-            gsap.timeline({
-              scrollTrigger: {
-                trigger: introRef.current,
-                start: "top top",
-                scrub: 2,
-                pin: true,
-                anticipatePin: true,
-                refreshPriority: 1,
-                immediateRender: false,
-                invalidateOnRefresh: true,
-              },
-            })
-              .to(foreGroundRef.current, {
+      
+      if (introRef.current && foreGroundRef.current && sectionNameRef.current && backGroundRef.current) {
+        mainTl.add(
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top top",
+              end:"200px",
+              scrub: 2,
+              pin: true,
+              pinSpacing: true,
+              anticipatePin: true,
+              refreshPriority: 2,
+              immediateRender: false,
+              invalidateOnRefresh: true,
+              onComplete: () => ScrollTrigger.refresh(),
+            },
+          })
+            .to(foreGroundRef.current, {
                 scale: 3,
                 y: "100",
                 duration: 5,
@@ -189,101 +147,119 @@ export default function Winter() {
                 autoAlpha: 0,
                 duration: 3,
               }, "<+=2")
-              .to(backGroundRef.current, {
-                autoAlpha: 0,
-                duration: 5,
-              }, 0)
-          );
-        }
-
-        // Curtain animation
-        if (WinterContentRef.current) {
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: WinterContentRef.current,
-              start: "top top-=1",
-              end: `+=${WinterPlaces.length * 100}%`,
-              scrub: true,
-              pin: true,
-              anticipatePin: true,
-              invalidateOnRefresh: true,
-            },
-          });
-
-          WinterPlaces.forEach((_, index) => {
-            if (curtonRefs[index]?.current && layerRefs[index]?.current) {
-              tl.to(curtonRefs[index].current, {
-                height: 0,
-                duration: 1,
-              }).to(layerRefs[index].current, {
-                autoAlpha: 0,
-              }, ">+=1");
-            }
-          });
-        }
-      } catch (error) {
-        console.error("GSAP animation error:", error);
+              .to(
+                introRef.current,
+                {
+                  autoAlpha: 0,
+                  duration: 1,
+                },
+                '<'
+              )
+        );
+      } else {
+        console.warn("[Winter] Missing refs for intro animation");
       }
-    }, containerRef.current);
+    }, containerRef);
 
-    return () => ctx.revert();
-  }, [curtonRefs, layerRefs]);
+    return () => ctx.current?.revert();
+  }, []);
 
-  const contents = useMemo(
-    () =>
-      WinterPlaces.map((place, index) => (
-        <PlaceContent
-          key={place}
-          place={place}
-          index={index}
-          layerRef={layerRefs[index]}
-          curtonRef={curtonRefs[index]}
-          WinterdaysAndNights={WinterdaysAndNights[index]}
-        />
-      )),
-    [layerRefs, curtonRefs]
-  );
+  
+  const content = CONFIG.PLACES.map((place, index) => (
+    <div key={place} className={styles.locationContainer}>
+      <p
+        className={styles.location}
+        ref={locationRefs.current[index]}
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${place} winter package details`}
+      >
+        {place}
+      </p>
+    </div>
+  ));
 
   return (
-    <div ref={containerRef} className={styles.container}>
-      <div ref={introRef} className={styles.intro}>
+    <div ref={containerRef} className={`${styles.container} ${className || ""}`}>
+      <div ref={introRef} className={styles.intro} style={{ pointerEvents: "none" }}>
         <div className={styles.background}>
           <img
-            src={'static/winter/template-background.png'}
+            src="/static/winter/template-background.png"
             alt="Winter scene background"
             className={styles.image}
             ref={backGroundRef}
             loading="eager"
             decoding="async"
+            fetchPriority="high"
             onError={(e) => {
-              e.target.src = LOGO_FALLBACK;
-              console.error("Failed to load intro background image");
+              e.target.src = CONFIG.LOGO_FALLBACK;
+              console.error("[Winter] Failed to load intro background image");
             }}
           />
         </div>
         <div className={styles.sectionContainer}>
-          <p ref={sectionNameRef} className={styles.sectionName}>
+          <p ref={sectionNameRef} className={styles.sectionName} style={{ willChange: "transform, opacity" }}>
             WINTER
           </p>
         </div>
         <div className={styles.foreGround}>
           <img
-            src='static/winter/template-foreground.png'
+            src="/static/winter/template-foreground.png"
             alt="Winter scene foreground"
             className={styles.image}
             ref={foreGroundRef}
             loading="eager"
             decoding="async"
+            fetchPriority="high"
             onError={(e) => {
-              e.target.src = LOGO_FALLBACK;
-              console.error("Failed to load intro foreground image");
+              e.target.src = CONFIG.LOGO_FALLBACK;
+              console.error("[Winter] Failed to load intro foreground image");
             }}
           />
         </div>
       </div>
-      <div ref={WinterContentRef} className={styles.WinterContent}>
-        {contents}
+
+      <div className={styles.WinterContent} ref={winterContentRef}>
+        {content}
+      </div>
+
+      <div className={styles.display}>
+        <div className={styles.displayImageContainer}>
+          <img
+            src={`${CONFIG.IMAGE_BASE_PATH}/darjeeling/darjeeling-jpg/darjeeling-jpg-large/darjeeling1.jpg`}
+            alt="Winter destination"
+            className={styles.displayImage}
+            ref={displayImageRef}
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              e.target.src = CONFIG.LOGO_FALLBACK;
+              console.error("[Winter] Failed to load display image");
+            }}
+          />
+        </div>
+        <div className={styles.displayTextContainer}>
+          <p
+            className={styles.displayText}
+            ref={displayTextRef}
+            aria-live="polite"
+          >
+            {`PACKAGES TYPICALLY RANGE FROM ${CONFIG.DAYS_NIGHTS[0][0][0]}N / ${CONFIG.DAYS_NIGHTS[0][0][1]}D TO ${CONFIG.DAYS_NIGHTS[0][1][0]}N / ${CONFIG.DAYS_NIGHTS[0][1][1]}D, CLICK TO SEE MORE.`}
+          </p>
+        </div>
       </div>
     </div>
   );
-}
+});
+
+Winter.propTypes = {
+  className: PropTypes.string,
+  ref: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
+  ]),
+};
+
+Winter.displayName = "Winter";
+
+export default Winter;

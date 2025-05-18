@@ -1,195 +1,250 @@
-import React, { useRef, useMemo, useEffect } from "react";
+import React, { useLayoutEffect, useEffect, useRef, useCallback, forwardRef, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "../Styles/AutumnMobile.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function AutumnMobile() {
+const CONFIG = {
+  PLACES: ["lake bled", "bavaria", "ontario", "new england", "alsace"],
+  SHOWING_PLACES: ["LAKE BLED", "BAVARIA", "ONTARIO", "NEW ENGLAND", "ALSACE"],
+  DAYS_NIGHTS: [
+    [[4, 5], [7, 8]],
+    [[6, 7], [9, 10]],
+    [[5, 6], [8, 9]],
+    [[6, 7], [10, 11]],
+    [[4, 5], [7, 8]],
+  ],
+  FORMATS: ["webp", "jpg"],
+  LOGO_FALLBACK: "/static/logo4.png",
+  IMAGE_BASE_PATH: "/static/autumn",
+};
+
+/**
+ * AutumnMobile component for mobile devices, displaying autumn destinations with animations.
+ * @param {Object} props - Component props
+ * @param {string} [props.className] - Additional CSS class for the container
+ */
+const AutumnMobile = forwardRef(({ className }, ref)=>{
+  const location = useLocation();
   const textRef = useRef(null);
   const gridRef = useRef(null);
   const containerRef = useRef(null);
-  const places = useMemo(() => ['lake bled', 'bavaria', 'ontario', 'new england', 'alsace'], []);
-  const ShowingPlaces = useMemo(() => ['LAKE BLED', 'BAVARIA', 'ONTARIO', 'NEW ENGLAND', 'ALSACE'], []);
-  const formats = useMemo(() => ['webp', 'jpg'], []);
-  const daysAndNights = useMemo(() => [[[4, 5], [7, 8]], [[6, 7], [9, 10]], [[5, 6], [8, 9]], [[6, 7], [10, 11]], [[4, 5], [7, 8]]], []);
-  const imageInfoRef = useRef([]);
-  const imageRefs = useRef([]);
+  const itemRefs = useRef(
+    CONFIG.PLACES.map(() => ({ info: React.createRef(), image: React.createRef() }))
+  );
+  const ctx = useRef(null);
 
-  const groupedImages = useMemo(() => {
-    if (!places.length || !formats.length) return [];
-    return places.map((name) => {
-      const placeObj = { alt: name };
-      formats.forEach((form) => {
-        placeObj[form] = `/static/autumn/${name}/${name}-${form}/${name}-${form}-medium/${name}1.${form}`;
-      });
-      return placeObj;
+  useEffect(()=>{
+    if(ref){
+      ref.current = containerRef.current
+    }
+  },[ref]);
+
+  // Validate data consistency
+  if (
+    CONFIG.PLACES.length !== CONFIG.DAYS_NIGHTS.length ||
+    CONFIG.PLACES.length !== CONFIG.SHOWING_PLACES.length
+  ) {
+    console.error("[AutumnMobile] Mismatch between PLACES, SHOWING_PLACES, and DAYS_NIGHTS arrays");
+  }
+
+  // Precompute grouped images
+  const groupedImages = useMemo(()=>{
+    return CONFIG.PLACES.map((name) => {
+    const placeObj = { alt: name };
+    CONFIG.FORMATS.forEach((form) => {
+      placeObj[form] = `${CONFIG.IMAGE_BASE_PATH}/${name}/${name}-${form}/${name}-${form}-medium/${name}1.${form}`;
     });
-  }, [places, formats]);
+    return placeObj;
+  })
+  },[]);
 
-  const content = places.length && groupedImages.length && ShowingPlaces.length && daysAndNights.length ? places.map((place, index) => (
-    <React.Fragment key={index}>
-      <div ref={(el) => (imageInfoRef.current[index] = el)} className={styles.imageinfo}>
-        <p className={styles.place}>{ShowingPlaces[index]}</p>
-        <p className={styles.info}>
-          {`Packages typically range from ${daysAndNights[index][0][0]}N / ${daysAndNights[index][0][1]}D to ${daysAndNights[index][1][0]}N / ${daysAndNights[index][1][1]}D, click to see more`}
-        </p>
-      </div>
-      <div ref={(el) => (imageRefs.current[index] = el)} className={styles.imageContainer}>
-        
-          <img
-            src={groupedImages[index].webp}
-            alt={groupedImages[index].alt}
-            className={styles.image}
-            onError={(e) => {
-              e.target.src = groupedImages[index].jpg;
-              console.log(`Switching to JPG: ${groupedImages[index].jpg}`);
-              e.target.onerror = () => {
-                console.error(`Failed to load JPG: ${groupedImages[index].jpg}`);
-                e.target.src = '/static/logo4.png';
-                console.log(`Falling back to logo: /static/logo4.png`);
-              };
-            }}
-            loading="lazy"
-            decoding="async"
-          />
-      
-      </div>
-    </React.Fragment>
-  )) : null;
+  // Handle image errors
+  const handleImageError = useCallback((e, index) => {
+    const jpgPath = groupedImages[index].jpg;
+    e.target.src = jpgPath;
+    console.warn(`[AutumnMobile] Switching to JPG: ${jpgPath}`);
+    e.target.onerror = () => {
+      console.error(`[AutumnMobile] Failed to load JPG: ${jpgPath}`);
+      e.target.src = CONFIG.LOGO_FALLBACK;
+      console.warn(`[AutumnMobile] Falling back to logo: ${CONFIG.LOGO_FALLBACK}`);
+    };
+  }, [groupedImages]);
 
-  const animateText = (chars) => {
-    if (!chars || !containerRef.current) return;
+  // Animate text characters
+  const animateText = useCallback((chars) => {
+    if (!chars?.length || !containerRef.current) {
+      console.warn("[AutumnMobile] Missing chars or containerRef for text animation");
+      return;
+    }
     gsap.set(chars, { opacity: 0 });
     gsap.to(chars, {
       opacity: 1,
-      duration: 1,
-      stagger: 0.1,
-      ease: 'expo.out',
+      duration: 0.6,
+      stagger: 0.08,
+      ease: "power2.out",
       scrollTrigger: {
         trigger: containerRef.current,
-        start: 'top center-=100px',
-        toggleActions: 'play none none none',
+        start: "top center+=100px",
+        end:"top center",
+        scrub:1,
         immediateRender: false,
         invalidateOnRefresh: true,
       },
     });
-  };
+  }, []);
 
-  const animateElements = (elements, options = {}) => {
-    if (!elements.length || !gridRef.current) return;
-    const { start = 'top center', duration = 0.5 } = options;
+  // Animate elements (info or images)
+  const animateElements = useCallback((elements, options = {}) => {
+    if (!elements?.length || !gridRef.current) {
+      console.warn("[AutumnMobile] Missing elements or gridRef for animation");
+      return;
+    }
+    const { start = "top center+=100", duration = 0.6 } = options;
     gsap.set(elements, { opacity: 0 });
     gsap.to(elements, {
       opacity: 1,
       duration,
-      ease: 'expo.out',
-      stagger: 0.1,
+      ease: "power2.out",
+      stagger: 0.08,
       scrollTrigger: {
         trigger: gridRef.current,
         start,
-        end: '+=1px',
-        toggleActions: 'play none none none',
+        end: "top center",
+        scrub:1,
         immediateRender: false,
         invalidateOnRefresh: true,
       },
     });
-  };
+  }, []);
 
-  const animateElementsEnd = (refs) => {
-    if (!refs.length || !containerRef.current) return;
-    refs.forEach((ref) => {
-      if (ref.current) {
-        gsap.to(ref.current, {
-          autoAlpha: 0,
-          duration: 0.5,
-          ease: 'expo.inOut',
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'bottom bottom',
-            end: '+=1px',
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
+  // Animate elements out
+  const animateElementsEnd = useCallback((ref) => {
+    if (!ref?.current || !containerRef.current) {
+      console.warn("[AutumnMobile] Missing ref or containerRef for end animation");
+      return;
+    }
+    gsap.to(ref.current, {
+      autoAlpha: 0,
+      duration: 0.4,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "bottom center+=100px",
+        end: "bottom center",
+        scrub: 1,
+        invalidateOnRefresh: true,
+      },
     });
-  };
+  }, []);
 
-  useEffect(() => {
+  // Animation setup
+  useLayoutEffect(() => {
     if (!containerRef.current || !textRef.current || !gridRef.current) {
-      console.warn('Required refs are missing, skipping animation setup');
+      console.warn("[AutumnMobile] Missing required refs, skipping animations");
       return;
     }
 
-    const infoElements = imageInfoRef.current.filter(Boolean);
-    const imageElements = imageRefs.current.filter(Boolean);
+    const infoElements = itemRefs.current.map((item) => item.info.current).filter(Boolean);
+    const imageElements = itemRefs.current.map((item) => item.image.current).filter(Boolean);
 
-    if (infoElements.length !== places.length || imageElements.length !== places.length) {
-      console.warn('Mismatch in ref counts, some elements may not animate', {
-        infoElements: infoElements.length,
-        imageElements: imageElements.length,
-        expected: places.length,
-      });
-      return;
+    if (infoElements.length !== CONFIG.PLACES.length || imageElements.length !== CONFIG.PLACES.length) {
+      console.warn("[AutumnMobile] Mismatch in ref counts, some elements may not animate");
     }
 
-    const ctx = gsap.context(() => {
-      const text = textRef.current.textContent || '';
+    ctx.current = gsap.context(() => {
+      // Text animation
+      const text = textRef.current?.textContent || "";
       if (!text) {
-        console.warn('No text content found for animation');
+        console.warn("[AutumnMobile] No text content for animation");
         return;
       }
-
-      try {
-        textRef.current.innerHTML = text
-          .split('')
-          .map(char => `<span class="${styles.char}">${char}</span>`)
-          .join('');
-      } catch (error) {
-        console.warn('Error splitting text:', error);
-        return;
-      }
-
+      textRef.current.innerHTML = text
+        .split("")
+        .map((char) => `<span class="${styles.char}">${char}</span>`)
+        .join("");
       const chars = gsap.utils.toArray(`.${styles.char}`, textRef.current);
       animateText(chars);
-      animateElements(infoElements);
-      animateElements(imageElements);
-      animateElementsEnd([textRef, gridRef]);
 
-      gsap.to(containerRef.current, {
+      gsap.to(
+        containerRef.current,{
+          backgroundColor:"#574964",
+          ease:'power2.out',
+          duration:0.6,
+          scrollTrigger:{
+            trigger:containerRef.current,
+            start:'top center+=100px',
+            end:'top center',
+            scrub:1,
+            invalidateOnRefresh:true,
+          }
+        }
+      );
+
+      // Info and image animations
+      animateElements(infoElements, { start: "top center" });
+      animateElements(imageElements, { start: "top center+=50px" });
+
+      // End animation (text only)
+      animateElementsEnd(gridRef);
+
+      // Background transition
+      gsap.fromTo(containerRef.current,{
+        backgroundColor:'#574964',
+      },{
         backgroundColor:'black',
-        ease: 'expo.inOut',
+        ease: "power2.out",
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'bottom bottom',
-          end: '+=1px',
-          scrub: true,
+          start: "bottom center+=100px",
+          end: "bottom center",
+          scrub: 1,
           invalidateOnRefresh: true,
         },
       });
-    }, containerRef);
+    }, containerRef.current);
 
-    let resizeTimeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 200);
-    };
+    return () => ctx.current?.revert();
+  }, [animateText, animateElements, animateElementsEnd]);
 
-    window.addEventListener('resize', handleResize);
+  // Refresh ScrollTrigger on route change
+  useEffect(() => {
+    const timer = setTimeout(() => ScrollTrigger.refresh(), 100);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
-    return () => {
-      ctx.revert();
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(resizeTimeout);
-      imageInfoRef.current = [];
-      imageRefs.current = [];
-    };
-  }, [places]);
+  // Generate content
+  const content = CONFIG.PLACES.map((place, index) => (
+    <React.Fragment key={place}>
+      <div
+        ref={itemRefs.current[index].info}
+        className={styles.imageinfo}
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${CONFIG.SHOWING_PLACES[index]} autumn package details`}
+      >
+        <p className={styles.place}>{CONFIG.SHOWING_PLACES[index]}</p>
+        <p className={styles.info} aria-live="polite">
+          {`Packages typically range from ${CONFIG.DAYS_NIGHTS[index][0][0]}N / ${CONFIG.DAYS_NIGHTS[index][0][1]}D to ${CONFIG.DAYS_NIGHTS[index][1][0]}N / ${CONFIG.DAYS_NIGHTS[index][1][1]}D, click to see more`}
+        </p>
+      </div>
+      <div ref={itemRefs.current[index].image} className={styles.imageContainer}>
+        <img
+          src={groupedImages[index].webp}
+          alt={groupedImages[index].alt}
+          className={styles.image}
+          loading={index === 0 ? "eager" : "lazy"}
+          fetchPriority={index === 0 ? "high" : "auto"}
+          decoding="async"
+          onError={(e) => handleImageError(e, index)}
+        />
+      </div>
+    </React.Fragment>
+  ));
 
-  if (!places.length || !content) {
+  if (!CONFIG.PLACES.length || !content.length) {
     return (
       <div className={styles.errorContainer}>
         Error: Unable to load content. Please try again later.
@@ -198,13 +253,16 @@ export default function AutumnMobile() {
   }
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div ref={containerRef} className={`${styles.container} ${className || ""}`}>
       <div className={styles.sectionName}>
-        <p ref={textRef} className={styles.text}>AUTUMN</p>
+        <p ref={textRef}>AUTUMN</p>
       </div>
       <div ref={gridRef} className={styles.grid}>
         {content}
       </div>
     </div>
   );
-}
+});
+
+
+export default AutumnMobile;
