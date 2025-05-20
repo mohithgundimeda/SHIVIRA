@@ -1,0 +1,10 @@
+.logoAnimationContainer {
+  position: relative;
+  width: 6rem;
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

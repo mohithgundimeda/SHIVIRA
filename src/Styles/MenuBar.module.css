@@ -1,9 +1,28 @@
+:root {
+  --menu-bg-color: rgba(0, 0, 0, 0.142);
+  --menu-overlay-color: rgba(71, 69, 69, 0.318);
+  --text-color: white;
+  --accent-color: #393e40;
+  --border-radius: 5px;
+  --z-index-base: 100;
+  --mobile-menu-width: 70vw;
+  --mobile-menu-height: 70vh;
+}
+
 @font-face {
   font-family: "Quicksand";
   src:url("/public/fonts/Quicksand/Quicksand-Regular.ttf") format("truetype") ;
   font-display: swap; 
   font-weight: normal; 
   font-style: normal; 
+}
+
+@font-face {
+  font-family: "Quicksand-Bold";
+  src:url("/public/fonts/Quicksand/Quicksand-Bold.ttf") format("truetype") ;
+  font-display: swap;
+  font-weight: bold;
+  font-style: normal;
 }
 
 .hero {
@@ -18,16 +37,17 @@
   align-items: center;
   min-height: 3.15rem; 
   user-select: none;
+  will-change: transform;
 }
 
 .menu {
   position: relative;
   min-width: max-content;
-  background-color: rgba(0, 0, 0, 0.142);
+  background-color:var(--menu-bg-color);
   font-size: 0.9rem;
-  color: white;
+  color: var(--text-color);
   padding: 1rem;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
   font-family: 'Quicksand', serif;
   text-align: center;
   backdrop-filter: blur(0.2rem);
@@ -35,13 +55,15 @@
   grid-template-columns: repeat(3, 1fr);
   row-gap: 1.2rem;
   overflow: hidden;
+  will-change: width, height;
+  backdrop-filter:invert(0.8);
 }
 
 .line {
   grid-column: 1 / 4;
   width: 100%;
   height: 0.5px;
-  background-color: white;
+  background-color: var(--text-color);
 }
 
 .explore,
@@ -70,15 +92,14 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(71, 69, 69, 0.318);
-  border-radius: 5px;
+  background-color: var(--menu-overlay-color);
+  border-radius: var(--border-radius);
   z-index: -1;
   transition: filter 0.2s ease-in-out;
 }
 .menuContent > p{
-
   cursor: default;
-  
+  margin: 0;
 }
 
 .menu:hover::before {
@@ -89,12 +110,14 @@
   cursor: pointer;
   border: none;
   background: none;
-  color: white;
+   color: var(--text-color);
   font-family: 'Quicksand', serif;
   font-size: small;
+  transition: font-weight 0.2s ease;
 }
 
-.menu button:hover {
+.menuBarMenu button:hover,
+.menuBarMenu button:focus-visible {
   font-weight: 500;
 }
 
@@ -104,11 +127,12 @@
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: white;
   cursor: pointer;
-  z-index: 101;
+  z-index: calc(var(--z-index-base) + 1);
   background: none;
   border: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .mobileMenu {
@@ -117,52 +141,47 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #2a353f;
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99;
-  transform: translateY(-100%);
-  transition: transform 0s; /* GSAP handles this */
+  z-index: calc(var(--z-index-base) - 1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  will-change: transform;
 }
 
-.mobileMenu.open {
-  transform: translateY(0);
-}
-
-.mobileMenu::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/public/static/logo4.png');
-  background-size: auto;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.1;
-  z-index: -1;
+.menuBarMobileMenu.menuBarOpen {
+  transform: translateX(0);
 }
 
 .mobileContent {
+  position: relative;
+ width: var(--mobile-menu-width);
+  height: var(--mobile-menu-height);
+  border-radius: 1rem;
+  background: var(--text-color);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+  gap: 2rem;
+  color: black;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobileContent button {
   background: none;
   border: none;
-  color: white;
   font-family: 'Quicksand', serif;
   font-size: larger;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-.mobileContent button:hover {
+.menuBarMobileContent button:hover,
+.menuBarMobileContent button:focus-visible {
   font-weight: 500;
 }
 
@@ -173,39 +192,38 @@
   transform: none; 
   display: flex;
   gap: clamp(1rem, 0.429rem + 2.857vw, 3rem);
-  color: white;
-  font-family: 'Quicksand', serif;
+  color: var(--text-color, #fff);
   font-weight: 400;
-  z-index: 100;
+  z-index: var(--z-index-base, 1);
 }
 
 .sideItems button {
-
-  background-color: transparent;
+ background: none;
   border: none;
-  color: #596f77;
-  font-family: 'Quicksand', serif;
-  font-size: clamp(0.65rem, 0.55rem + 0.625vw, 1rem);
-  font-weight: 500;
+  color: var(--accent-color, #6ab0ff);
+  font-family: "Quicksand-Bold", serif;
+  font-size: clamp(0.65rem, 0.521rem + 0.643vw, 1.1rem);
   position: relative;
   padding-bottom: 0.2rem;
   cursor: pointer;
-  font-weight: 600;
-  
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  text-transform: uppercase;
 }
 
 .sideItems button::after {
-  content: '';
+ content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
   width: 0;
-  height: 0.5px;
-  background-color: #596f77;
+  height: 1px;
+  background-color: var(--accent-color, #6ab0ff);
   transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
 }
 
-.sideItems button:hover::after {
+.sideItems button:hover::after,
+.sideItems button:focus-visible::after {
   width: 100%;
   left: 0;
 }

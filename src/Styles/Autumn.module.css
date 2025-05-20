@@ -10,7 +10,7 @@
 .Container {
   width: 100vw;
   position: relative;
-  background-color: #dfa579;
+  background-color: #574964;
 }
 
 /* Panel Styles */
@@ -22,7 +22,7 @@
 }
 
 .colored {
-  background-color: #dfa579;
+  background-color: #574964;
 }
 
 .transparent {
@@ -30,7 +30,7 @@
 }
 
 .panelText {
-  color: beige;
+  color: white;
   text-transform: uppercase;
   position: absolute;
   top: 50%;
@@ -44,7 +44,7 @@
 }
 
 .seemore {
-  color: beige;
+  color: white;
   text-transform: uppercase;
   font-size: clamp(0.8rem, 0.34rem + 0.955vw, 1.2rem);
   font-family: "JuliusSansOne", sans-serif;
@@ -64,7 +64,7 @@
   left: 50%;
   width: 0;
   height: 1px;
-  background-color: beige;
+  background-color: #574964;
   transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
 }
 
@@ -107,9 +107,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: beige;
+  color: white;
   font-family: "JuliusSansOne", sans-serif;
   font-size: 1.5rem;
   text-align: center;
-  background-color: #dfa579;
+  background-color: #574964;
 }

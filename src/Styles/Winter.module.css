@@ -1,10 +1,18 @@
 @font-face {
     font-family: "Jost";
-    src:url("/public/fonts/Jost/Jost-Regular.ttf") format("truetype") ;
-    font-display: swap; 
-    font-weight: normal; 
-    font-style: normal; 
-  }
+    src: url("/public/fonts/Jost/Jost-Regular.ttf") format("truetype");
+    font-display: swap;
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "BebasNeue";
+    src: url("/public/fonts/Bebas_Neue/BebasNeue-Regular.ttf") format("truetype");
+    font-display: swap;
+    font-weight: normal;
+    font-style: normal;
+}
 
 .container {
     position: relative;
@@ -12,17 +20,19 @@
     min-height: 100vh;
     overflow: hidden;
     margin: 0;
-    top:0;
+    top: 0;
     background-color: #c9c9c9;
+    
 }
 
 .intro {
-    position: relative;
+    position: absolute;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     top: 0;
     left: 0;
     overflow: hidden;
+    z-index: 2;
 }
 
 .background {
@@ -67,94 +77,97 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-size: 15rem;
+    font-size: clamp(10rem, 4.254rem + 11.94vw, 15rem);
     margin: 0;
-    
 }
 
-.WinterContent{
-    position: relative;
-    width: 100%;
-    min-height: 100vh;
-    overflow: hidden;
-    background-color: #A2A695;
-    
-}
-.contentimage{
-    width: 100%;
-    height: 100vh;
-    object-fit: cover;
-    object-position: center;
-    filter: brightness(0.6);
-    
-}
-.locationName{
-    font-family: "Jost", sans-serif;
-    position: absolute; 
-    top: 0; 
-    left: 0;
-    overflow: hidden;
-    z-index: 3;
-    top:50%;
-    left:50%;
-    transform: translate(-50%, -50%);
-    font-size: 10rem;
-    color: rgba(255, 255, 255, 0.2);
-    text-shadow: 0px 2px 1px rgba(15, 15, 15, 0.07);
-    font-weight: 500;
-    text-align: center;
-    cursor: default;
-    font-weight: 600;
-}
-
-.contentText{
+.WinterContent {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    background-color: #c9c9c9;
     z-index: 1;
-    font-family: "Jost", sans-serif;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.2);
-    text-shadow: 0px 2px 1px rgba(15, 15, 15, 0.07);
-    cursor: default;
-    font-weight: 600;
-}
-
-.flex{
-    position: absolute;
     display: flex;
-    gap: 4rem;
-    width: 100%;
+    flex-direction: column;
     justify-content: center;
-    top: 20%;
+    align-items: center;
+    transition: background-color 0.3s ease-in-out;
 }
 
-.duration{
-    font-size: 2rem;
+.WinterContent:has(.location:hover) {
+    background-color: transparent;
+}
+
+.WinterContent:has(.location:hover) .location:not(:hover) {
+    color: transparent;
+    transition: color 0.3s ease-in-out;
+}
+
+.locationContainer {
+    min-width: max-content;
+}
+
+.location {
+    font-family: "BebasNeue", sans-serif;
     text-align: center;
-    text-align: end;
-}
-.to{
-    font-size: 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.seeMore {
-    font-size: 0.9rem;
-    text-transform: uppercase;
     cursor: pointer;
-    font-family: "Jost", sans-serif;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.447);
-    position: absolute;
-    right:2rem;
-    bottom:1rem;
-    display: flex;
-    align-items: center;
-  }
+    letter-spacing: 0.2rem;
+    font-size: clamp(5rem, 3.851rem + 2.388vw, 6rem);
+    color: #000000;
+    transition: color 0.3s ease-in-out;
+}
 
-  .mui{
-    font-size:1.2rem;
-  }
+.location:hover {
+    color: #c9c9c9;
+}
+
+.display {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    z-index: 0;
+    overflow: hidden;
+   
+}
+
+.displayImageContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    overflow: hidden;
+    border-radius: 1rem;
+   
+}
+
+.displayImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+   filter: brightness(0.6);
+}
+
+.displayTextContainer{
+    min-width: max-content;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
+    padding-bottom: 2rem;
+}
+
+.displayText{
+    font-family: "BebasNeue", sans-serif;
+    color: #c9c9c9;
+    font-size: 1.2rem;
+    text-align: center;
+    letter-spacing: 0.2rem;
+}

@@ -100,21 +100,10 @@ const MenuBar = ({
     toggleMenu();
   }, [navigate, toggleMenu]);
 
-  
-  // const createScrollHandler = useCallback(
-  //   (ref, options = {}, errorMessage) => () => {
-  //     if (!ref?.current || !window.lenis) {
-  //       logError(errorMessage);
-  //       return;
-  //     }
-  //     window.lenis.scrollTo(ref.current, {
-  //       immediate: true,
-  //       ...options,
-  //     });
-  //     toggleMenu();
-  //   },
-  //   [toggleMenu]
-  // );
+  const handleNavigationToForm = useCallback(()=>{
+    navigate('/Form');
+    toggleMenu();
+  },[navigate, toggleMenu]);
 
  
 const handleScrollToHome = useCallback(() => {
@@ -353,7 +342,10 @@ const handleScrollToStarter = useCallback(() => {
         >
           Search
         </button>
-        <button aria-label="Design your trip">Design My Trip</button>
+        <button 
+        aria-label="Design your trip"
+        onClick={handleNavigationToForm}
+        >Design My Trip</button>
       </div>
     </nav>
   );

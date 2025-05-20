@@ -5,10 +5,6 @@
 }
 
 
-::-webkit-scrollbar {
-  width: 0px;
-}
-
 body{
     margin: 0;
     padding: 0;
@@ -20,3 +16,8 @@ body{
 ::selection {
     background-color: rgb(193, 121, 105); /* 50% transparent */
 }
+
+/* ::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+} */

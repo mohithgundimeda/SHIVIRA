@@ -1,0 +1,41 @@
+.container{
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #b4aea6;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.50) 0%, rgba(0,0,0,0.50) 100%), radial-gradient(at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.50) 50%);
+    background-blend-mode: soft-light, screen;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-self:center;
+    align-self: center;
+}
+
+.topContainer{
+    position: relative;
+    width: 100%;
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items:end ;
+}
+
+.logoContainer{
+    position: relative;
+    width: 4rem;
+    overflow: hidden;
+    
+}
+.logo{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.bottomContainer{
+    position: relative;
+    width: 100%;
+    height: 80%;
+}

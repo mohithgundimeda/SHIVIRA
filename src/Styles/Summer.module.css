@@ -1,22 +1,24 @@
 @font-face {
   font-family: "JuliusSansOne";
-  src:url("/public/fonts/Julius_Sans_One/JuliusSansOne-Regular.ttf") format("truetype") ;
-  font-display: swap; 
-  font-weight: normal; 
-  font-style: normal; 
+  src: url("/public/fonts/Julius_Sans_One/JuliusSansOne-Regular.ttf") format("truetype");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
 }
 
-.container{
+/* Main container with gradient background */
+.container {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background-image: linear-gradient(90deg,rgb(19, 30, 39) 0%, #517fa4 100%);
+  background-image: linear-gradient(to bottom, #243949 0%, #517fa4 100%);
   overflow: hidden;
   transition: all ease-in-out;
   z-index: 0;
   font-family: "JuliusSansOne", sans-serif;
 }
 
+/* Eclipse overlay for sun/moon interaction */
 .eclipseOverlay {
   position: absolute;
   top: 0;
@@ -29,7 +31,8 @@
   z-index: 1;
 }
 
-.content{
+/* Content wrapper for sun, moon, and SVG path */
+.content {
   position: absolute;
   overflow: hidden;
   z-index: 2;
@@ -39,32 +42,37 @@
   height: 100%;
 }
 
-.sun{
+/* Sun image styling */
+.sun {
   position: absolute;
   z-index: 0;
-  width: clamp(11.5rem, 7.478rem + 8.358vw, 15rem);/*15*/
-  object-fit: cover;
-  transform-origin: center center;
-  cursor: default;
-}
-.moon{
-  position: absolute;
-  z-index: 1;
-  width:clamp(12.5rem, 7.903rem + 9.552vw, 16.5rem);/*16.5*/
+  width: clamp(11.5rem, 7.478rem + 8.358vw, 15rem);
   object-fit: cover;
   transform-origin: center center;
   cursor: default;
 }
 
-.nestedContainer{
+/* Moon image styling */
+.moon {
+  position: absolute;
+  z-index: 1;
+  width: clamp(12.5rem, 7.903rem + 9.552vw, 16.5rem);
+  object-fit: cover;
+  transform-origin: center center;
+  cursor: default;
+}
+
+/* Nested container for cards and leaf */
+.nestedContainer {
   position: absolute;
   width: 100%;
   height: 100%;
   z-index: 3;
-  top:0;
+  top: 0;
   left: 0;
 }
 
+/* Container for card grid */
 .fenceContainer {
   position: absolute;
   width: 100%;
@@ -74,9 +82,9 @@
   left: 0;
   bottom: -50vh;
   overflow: visible;
-  
 }
 
+/* Flex container for cards */
 .fence {
   width: 100%;
   height: 100%;
@@ -90,6 +98,7 @@
   z-index: 1;
 }
 
+/* Individual card styling */
 .fenceBlock {
   position: relative;
   flex: 1;
@@ -101,6 +110,7 @@
   cursor: pointer;
 }
 
+/* Card image styling */
 .fenceImage {
   width: 100%;
   height: 100%;
@@ -110,8 +120,9 @@
   cursor: pointer;
 }
 
+/* Place name overlay */
 .placeName {
-  font-size: clamp(0.8rem, 0.34rem + 0.955vw, 1.2rem);/*1.2*/
+  font-size: clamp(0.8rem, 0.34rem + 0.955vw, 1.2rem);
   font-weight: 500;
   position: absolute;
   top: 0;
@@ -127,6 +138,7 @@
   cursor: pointer;
 }
 
+/* Click prompt overlay */
 .clickContainer {
   font-size: clamp(0.4rem, -0.06rem + 0.955vw, 0.8rem);
   font-weight: 400;
@@ -144,7 +156,8 @@
   cursor: pointer;
 }
 
-.leafContainer{
+/* Container for leaf and autumn transition */
+.leafContainer {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -156,21 +169,24 @@
   align-items: center;
 }
 
-.autumn{
+/* Autumn section styling */
+.autumn {
   position: absolute;
   width: 100%;
   height: 100%;
   display: flex;
+  font-family: 'JuliusSansOne', sans-serif;
   justify-content: center;
   align-items: center;
   font-size: clamp(1.5rem, -0.799rem + 4.776vw, 3.5rem);
-  font-weight: 900;
+  /* font-weight: 900; */
   z-index: 2;
-  color:cornsilk;
+  color: white;
   cursor: default;
 }
 
-.leaf{
+/* Leaf image styling */
+.leaf {
   width: clamp(8rem, -0.045rem + 16.716vw, 15rem);
   object-fit: cover;
   z-index: 1;

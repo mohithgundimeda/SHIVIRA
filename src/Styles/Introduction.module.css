@@ -33,7 +33,7 @@
   
   .logo {
     width: clamp(2.5rem, 4vw, 4rem);
-    height: clamp(2rem, 3vw, 3rem);
+    height: auto;
     cursor: default;
   }
   
@@ -46,6 +46,3 @@
     text-decoration: none;
   }
   
-  .ira {
-    letter-spacing: 0.2vw;
-  }

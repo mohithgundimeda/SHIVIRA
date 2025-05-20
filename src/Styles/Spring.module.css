@@ -1,9 +1,17 @@
 @font-face {
-  font-family: "JuliusSansOne";
-  src:url("/public/fonts/Julius_Sans_One/JuliusSansOne-Regular.ttf") format("truetype") ;
-  font-display: swap; 
-  font-weight: normal; 
-  font-style: normal; 
+  font-family: "Cormorant";
+  src: url("/public/fonts/Cormorant/Cormorant-Regular.ttf") format("truetype");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Cormorant-Bold";
+  src: url("/public/fonts/Cormorant/Cormorant-Bold.ttf") format("truetype");
+  font-display: swap;
+  font-weight:bold;
+  font-style: normal;
 }
 
 
@@ -11,38 +19,37 @@
     position: relative;
     width: 100%;
     min-height: 100vh;
-    background-color: #A2A695;
+    background: linear-gradient(to top, #A2A695 0%, #A2A695 80%, #C9C9C9 100%);
     overflow: hidden;
+    padding-top: 5rem;
   }
   
   .sectionName {
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: center;
     font-size: clamp(4rem, 2.851rem + 2.388vw, 5rem);
     color: #4B5237;
     text-align: center;
-    font-family: "JuliusSansOne", sans-serif;
+    font-family: "Cormorant", sans-serif;
     cursor: default;
   }
   .char {
     display: inline-block;
+    will-change: opacity;
   }
-
-  .sandwich{
-    position:relative;
-    width: 100%;
-    min-height: 100vh;
-
-  }
+  
   .grid{
     position: relative;
     display: grid;
-    margin: 0 auto;
+    justify-items: center;
+    justify-self: center;
     grid-template-columns: 30% 70%;
     gap: 5rem;
     width: 80%;
-    height: auto;
+    height: 300vh;
+    margin-top: 10rem;
     padding-bottom: 1rem;
   }
 
@@ -50,14 +57,23 @@
     position: relative;
     width: 100%;
     border-top: 1px solid #4B5237;
-    transition: all 1s ease-in-out;
+    will-change: opacity;
+    transition: all 0.3s ease-in-out;
     &:hover {
       border-top: 1px solid #4B5237;
       box-shadow: 0px 0px 15px #868a7c;
       transition: all 1s ease-in-out;
       border-radius: 1rem;
     }
+ 
   }
+
+  .imageinfo:hover,
+.imageinfo:focus {
+  border-top: 1px solid #4B5237;
+  box-shadow: 0px 0px 15px #868a7c;
+  border-radius: 1rem;
+}
 
   .place{
     position: absolute;
@@ -84,47 +100,59 @@
     align-items: end;
     text-align:center;
     padding-bottom: 1rem;
+    cursor: default;
   }
+  
  .imageContainer {
     position: relative;
-    width: 100%;
-    height: 60vh;
+    width: 80%;
+    height: auto;
     overflow: hidden;
     transition: all 1s ease-in-out;
+    will-change: opacity;
   }
 
   .image{
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: brightness(0.8);
+    z-index: 1;
   }
 
-  .animationContainer{
-    position: absolute;
-    width: 100vw;
-    height: 100vh;
-    bottom: 0;
-    left: 0;
-    overflow: hidden;
-    z-index: 100;
-    pointer-events: none;
-  }
-
-  .petal{
-    width: 8rem;
-    height: 8rem;
-  }
-
+  
   .emptyContainer{
     position: relative;
     width: 100%;
     height: 100vh;
-    background-color: #A2A695;
-    overflow: hidden;
+    background: #A2A695;
+    overflow: visible;
   }
+
+  .animationContainer{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .petal {
+  position: absolute;
+  will-change: transform, scale, rotate;
+  width: 8rem;
+  height: 8rem;
+  z-index: 2;
+}
+
 
   .sectionNameContainer{
     position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: flex;
@@ -136,9 +164,8 @@
   .summer{
     font-family: "JuliusSansOne", sans-serif;
     font-size: clamp(4rem, 2.851rem + 2.388vw, 5rem);
-    color: beige;
+    color: #A2A695;
     text-align: center;
     cursor: default;
-    opacity: 0;
   }
 

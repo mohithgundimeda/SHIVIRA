@@ -12,33 +12,28 @@
     width: 100vw;
     height: auto;
     min-height: 100vh;
-    background-color:#d7d1bf; /*d7d1bf*/
-    color: #6c52344a;  
+    background-color:#d7d1bf;
+    color: #6C5234;
     font-family: "Cormorant", serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    
-    
 }
 
 
 .textHolder{
-    margin-top: 10rem;
+  position: relative;
     display: flex;
     width: 100%;
     justify-content: center;
     text-align: center;
     text-transform:uppercase; 
-    font-family: "Cormorant", serif;
-    /* background-color: azure; */
 }
 
 
 .text {
     font-size:clamp(1.4rem, 1.229rem + 0.857vw, 2rem); 
-    /* font-weight: 600; */
-    width: 80%;
+    width: 90%;
     height: 100%;
     letter-spacing: 0.1rem;
     cursor: default;
@@ -47,24 +42,20 @@
   }
 
   .imageExpoContainer {
+    position: relative;
     width: 100%;
     height: auto;
-    min-height: 150vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* background-color: black; */
-    overflow: hidden;
 }
 
 .sectionName{
   z-index:0;
-  font-size: clamp(1.8rem, 1.314rem + 2.429vw, 3.5rem); /*clamp(1rem, 1.571rem + 2.143vw, 3.5rem); */
-  /* font-weight: 500; */
+  font-size: clamp(1.8rem, 1.314rem + 2.429vw, 3.5rem);
   cursor: default;
   user-select: none;
-  color: #6c5234; 
-  /* letter-spacing: 0.2rem; */
 }
 
 .trendingImagesCont{
@@ -82,11 +73,16 @@
 
 .trendingContent{
   position: relative;
-  width: 100%;
+  width: 100vw;
   height: auto;
-  min-height: max-content;/*320*/
-  /* background-color: #6c5234; */
+  min-height: max-content;
   overflow:hidden;
+}
+
+.trendingContent1{
+  position: relative;
+  width: 100vw;
+  height: 100vh;
 }
 
 @media (max-width: 1024px) {
@@ -101,7 +97,7 @@
   .imageExpoContainer {
     width: 100%;
     height: auto;
-    min-height: 100vh;
+    min-height: 60vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -111,6 +107,11 @@
     width: 14rem;
     height: 22rem;
   }
+
+  .text{
+    width: 80%;
+  }
+  
 }
 
 @media (max-width: 600px) {

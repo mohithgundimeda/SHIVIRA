@@ -1,0 +1,75 @@
+@font-face {
+  font-family: "Quicksand";
+  src:url("/public/fonts/Quicksand/Quicksand-Regular.ttf") format("truetype") ;
+  font-display: swap; 
+  font-weight: normal; 
+  font-style: normal; 
+}
+
+
+.container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: #b4aea6;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.50) 0%, rgba(0,0,0,0.50) 100%), radial-gradient(at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.50) 50%);
+    background-blend-mode: soft-light, screen;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards;
+    overflow: hidden;
+    color: rgb(110, 110, 110);
+    font-family: 'Quicksand', sans-serif;
+}
+
+.header {
+    position: relative;
+    width: 80%;
+    height: auto;
+    margin-top: 3rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    padding:clamp(0rem, -0.286rem + 1.429vw, 1rem);
+    gap: clamp(0rem, -0.571rem + 2.857vw, 2rem);
+}
+
+.iconContainer {
+    position: relative;
+    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.inputContainer {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.icon {
+    font-size: clamp(2rem, 1.771rem + 1.143vw, 2.8rem) !important; /*2.8*/
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        width: 100%;
+    }
+    .inputContainer {
+        padding-left: 1rem;
+        padding-top: 0.5rem;
+}
+}
