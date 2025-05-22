@@ -97,13 +97,11 @@ const MenuBar = ({
   
   const handleNavigationToSearch = useCallback(() => {
     navigate('/Search');
-    toggleMenu();
-  }, [navigate, toggleMenu]);
+  }, [navigate]);
 
   const handleNavigationToForm = useCallback(()=>{
     navigate('/Form');
-    toggleMenu();
-  },[navigate, toggleMenu]);
+  },[navigate]);
 
  
 const handleScrollToHome = useCallback(() => {

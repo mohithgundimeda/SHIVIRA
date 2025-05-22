@@ -9,6 +9,7 @@
   
   .content {
     opacity: 0;
+    overflow: hidden;
     animation: fadeIn 0.5s ease-in forwards;
   }
   .content > * {

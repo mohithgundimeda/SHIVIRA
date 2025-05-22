@@ -102,6 +102,7 @@ const Introduction = ({ onComplete }) => {
           className={styles.logo}
           src="/static/logo4.png"
           alt="Shivira logo"
+          loading="eager"
           aria-hidden="true"
         />
       </div>

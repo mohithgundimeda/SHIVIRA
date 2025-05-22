@@ -1,6 +1,6 @@
-back to home in card
-place holder images
-https://codepen.io/GreenSock/details/bGPBpeY
+// back to home in card
+// place holder images
+// https:codepen.io/GreenSock/details/bGPBpeY
 
             // Fade out the entire container on scroll
             // gsap.to(introRef.current, {
