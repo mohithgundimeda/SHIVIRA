@@ -11,7 +11,7 @@
     min-height: 100vh;
     overflow: hidden;
     top: 0;
-    background-color: #A2A695;
+    background: linear-gradient(to bottom, #B99470, #FFB4A2);
 }
 
 .sectionName {

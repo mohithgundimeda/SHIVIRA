@@ -71,6 +71,7 @@
 .grid {
   width: 100%;
   display: grid;
+  margin-top: 2rem;
   grid-template-columns: repeat(3, 1fr);
   align-items: start;
   padding: clamp(1.5rem, 3vw, 3rem);

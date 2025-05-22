@@ -160,7 +160,8 @@ const groupedImages = useMemo(() => {
         .split("")
         .map((char) => `<span class="${styles.char}">${char}</span>`)
         .join("");
-      const chars = gsap.utils.toArray(`.${styles.char}`, textRef.current);
+      
+       const chars = gsap.utils.toArray("span", textRef.current);
       animateText(chars);
 
       // Info and image animations
@@ -170,19 +171,7 @@ const groupedImages = useMemo(() => {
       // End animation (text only)
       animateElementsEnd(gridRef);
 
-      // Background transition
-      gsap.to(containerRef.current, {
-        backgroundColor: "#A2A695",
-        ease: "power2.out",
-        duration:0.6,
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "bottom center+=100px",
-          end: "bottom center",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
-      });
+      
     }, containerRef.current);
 
     return () => ctx.current?.revert();

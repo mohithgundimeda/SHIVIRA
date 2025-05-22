@@ -13,7 +13,7 @@
     min-height: 100vh;
     overflow: hidden;
     top: 0;
-    background-color: #183B4E;
+    background: linear-gradient(to bottom, #FFB4A2 50%, #000);
   }
   
   /* Section Name Styles */

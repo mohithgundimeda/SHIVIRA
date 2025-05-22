@@ -83,45 +83,6 @@ const Contact = forwardRef((props, ref) => {
     }
   }, [ref]);
 
-  useEffect(()=>{
-    if(isMobile){
-      const ctx = gsap.context(()=>{
-          if(!containerRef.current || !headerRef.current) return;
-            gsap.set(containerRef.current,{backgroundColor:"#574964"});
-            gsap.set(headerRef.current,{opacity:0});
-            gsap.to(containerRef.current,{
-              backgroundColor:'black',
-              ease:'power2.out',
-              duration:0.6,
-              scrollTrigger:{
-                trigger:containerRef.current,
-                start:'top center+=100px',
-                end:'top center',
-                scrub:1,
-                invalidateOnRefresh:true
-              }
-            })
-            gsap.to(
-              headerRef.current,{
-                opacity:1,
-                ease:'power2.out',
-                duration:0.6,
-                 scrollTrigger:{
-                    trigger:containerRef.current,
-                    start:'top center+=100px',
-                    end:'top center',
-                    scrub:1,
-                    invalidateOnRefresh:true
-                  }
-              }
-            );
-
-      },containerRef);
-
-      return()=>ctx.revert();
-    }
-  },[isMobile]);
-
   
   useEffect(() => {
     try {

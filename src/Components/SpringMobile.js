@@ -141,7 +141,7 @@ const SpringMobile = forwardRef(({ className }, ref)=>{
       console.warn("[SpringMobile] Missing required refs, skipping animations");
       return;
     }
-
+    
     const infoElements = itemRefs.current.map((item) => item.info.current).filter(Boolean);
     const imageElements = itemRefs.current.map((item) => item.image.current).filter(Boolean);
 
@@ -160,20 +160,10 @@ const SpringMobile = forwardRef(({ className }, ref)=>{
         .split("")
         .map((char) => `<span class="${styles.char}">${char}</span>`)
         .join("");
-      const chars = gsap.utils.toArray(`.${styles.char}`, textRef.current);
+     
+       const chars = gsap.utils.toArray("span", textRef.current);
 
-      gsap.to(containerRef.current,{
-        backgroundColor:'#A2A695',
-        ease:'power2.out',
-        duration:0.6,
-        scrollTrigger:{
-          trigger:containerRef.current,
-          start:"top center+=100px",
-          end:"top center",
-          scrub:1,
-          invalidateOnRefresh:true
-        }
-      });
+
       animateText(chars);
 
       // Info and image animations
@@ -183,20 +173,6 @@ const SpringMobile = forwardRef(({ className }, ref)=>{
       // End animation (text only)
       animateElementsEnd(gridRef);
 
-      // Background transition
-      gsap.fromTo(containerRef.current,{
-        backgroundColor:'#A2A695'
-      }, {
-        backgroundColor: '#183B4E',
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "bottom center+=100px",
-          end: "bottom center",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
-      });
     }, containerRef.current);
 
     return () => ctx.current?.revert();

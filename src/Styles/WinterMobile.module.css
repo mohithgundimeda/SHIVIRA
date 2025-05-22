@@ -13,7 +13,7 @@
     min-height: 100vh;
     overflow: hidden;
     top:0;
-    background-color: #BCC2C3;
+    background: linear-gradient(to bottom, #BCC2C3, #A2A695);
     overscroll-behavior:none;
 }
 

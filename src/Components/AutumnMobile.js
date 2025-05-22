@@ -168,21 +168,6 @@ const AutumnMobile = forwardRef(({ className }, ref)=>{
      const chars = gsap.utils.toArray("span", textRef.current);
       animateText(chars);
 
-      gsap.to(
-        containerRef.current,{
-          backgroundColor:"#574964",
-          ease:'power2.out',
-          duration:0.6,
-          scrollTrigger:{
-            trigger:containerRef.current,
-            start:'top center+=100px',
-            end:'top center',
-            scrub:1,
-            invalidateOnRefresh:true,
-          }
-        }
-      );
-
       // Info and image animations
       animateElements(infoElements, { start: "top center" });
       animateElements(imageElements, { start: "top center" });
@@ -190,20 +175,6 @@ const AutumnMobile = forwardRef(({ className }, ref)=>{
       // End animation (text only)
       animateElementsEnd(gridRef);
 
-      // Background transition
-      gsap.fromTo(containerRef.current,{
-        backgroundColor:'#574964',
-      },{
-        backgroundColor:'black',
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "bottom center+=100px",
-          end: "bottom center",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
-      });
     }, containerRef.current);
 
     return () => ctx.current?.revert();
