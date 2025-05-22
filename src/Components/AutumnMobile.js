@@ -165,7 +165,7 @@ const AutumnMobile = forwardRef(({ className }, ref)=>{
         .split("")
         .map((char) => `<span class="${styles.char}">${char}</span>`)
         .join("");
-      const chars = gsap.utils.toArray(`.${styles.char}`, textRef.current);
+     const chars = gsap.utils.toArray("span", textRef.current);
       animateText(chars);
 
       gsap.to(
@@ -185,7 +185,7 @@ const AutumnMobile = forwardRef(({ className }, ref)=>{
 
       // Info and image animations
       animateElements(infoElements, { start: "top center" });
-      animateElements(imageElements, { start: "top center+=50px" });
+      animateElements(imageElements, { start: "top center" });
 
       // End animation (text only)
       animateElementsEnd(gridRef);
