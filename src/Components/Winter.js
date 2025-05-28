@@ -4,12 +4,13 @@ import PropTypes from "prop-types";
 import styles from "../Styles/Winter.module.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const CONFIG = {
   LOGO_FALLBACK: "/static/logo4.png",
-  IMAGE_BASE_PATH: "/static/winter",
+  IMAGE_BASE_PATH: "/static/admin",
   PLACES: ["darjeeling", "srinagar", "gangtok", "manali", "shimla"],
   DAYS_NIGHTS: [
     [[5, 6], [8, 9]],
@@ -22,6 +23,7 @@ const CONFIG = {
 
 const Winter = forwardRef(({ className, ...props }, ref) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const containerRef = useRef(null);
   const foreGroundRef = useRef(null);
   const sectionNameRef = useRef(null);
@@ -164,6 +166,14 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
     return () => ctx.current?.revert();
   }, []);
 
+  const handleClick = useCallback((place) => {
+      if (!place || typeof place !== 'string') {
+        console.error('Invalid place name provided for booking');
+        return;
+      }
+      navigate(`/${place}-itinerary`);
+    }, [navigate]);
+
   
   const content = CONFIG.PLACES.map((place, index) => (
     <div key={place} className={styles.locationContainer}>
@@ -172,6 +182,7 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
         ref={locationRefs.current[index]}
         role="button"
         tabIndex={0}
+        onClick={()=>handleClick(place)}
         aria-label={`View ${place} winter package details`}
       >
         {place}

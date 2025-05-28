@@ -10,13 +10,12 @@
 .container {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #b4aea6;
     background-image: linear-gradient(to bottom, rgba(255,255,255,0.50) 0%, rgba(0,0,0,0.50) 100%), radial-gradient(at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.50) 50%);
     background-blend-mode: soft-light, screen;
     opacity: 0;
     animation: fadeIn 0.5s ease-in-out forwards;
-    overflow: hidden;
     color: rgb(110, 110, 110);
     font-family: 'Quicksand', sans-serif;
 }
@@ -25,12 +24,13 @@
     position: relative;
     width: 80%;
     height: auto;
-    margin-top: 3rem;
+    padding-top: 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-self: center;
-    padding:clamp(0rem, -0.286rem + 1.429vw, 1rem);
     gap: clamp(0rem, -0.571rem + 2.857vw, 2rem);
 }
 
@@ -52,8 +52,123 @@
 
 
 .icon {
-    font-size: clamp(2rem, 1.771rem + 1.143vw, 2.8rem) !important; /*2.8*/
+    font-size: clamp(2rem, 1.771rem + 1.143vw, 2.8rem) !important;
 }
+
+.content{
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: grid;
+    margin-top: 3rem;
+    gap: 0.3rem;
+    grid-template-columns: repeat(4, 1fr);
+    align-content: start;
+    justify-items: center;
+}
+.gridItem {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.gridImage{
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.textContainer {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  min-height: 10%;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  justify-content:space-around;
+  z-index: 1;
+  color: white;
+  font-weight: 500;
+  backdrop-filter: blur(9px);
+  background-color: rgba(0, 0, 0, 0.142);
+  font-size:clamp(0.65rem, 0.579rem + 0.357vw, 0.9rem);
+}
+
+.packageName {
+    position: relative;
+    text-transform: uppercase;
+}
+.duration{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.3rem;
+    text-transform: uppercase;
+}
+
+.skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+}
+
+.errorMessage {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.errorMessageText {
+  font-size: clamp(0.65rem, 0.579rem + 0.357vw, 0.9rem);
+  color: rgb(0, 0, 0);
+}
+
+.errorAlert {
+  margin: 16px;
+}
+
+.tagsWindow{
+    position: relative;
+    margin: 2rem;
+    max-width: 90%;
+    text-align: center;
+    min-height: max-content;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    justify-self: center;
+    gap: 1rem;
+}
+
+.tagBiscuit{
+    position: relative;
+    text-transform: uppercase;
+    color: black;
+     background-color: #A27B5C;
+    text-wrap: nowrap;
+}
+
+.crossIcon{
+    font-size: 1.7rem;
+}
+
+
 
 @keyframes fadeIn {
     from {
@@ -72,4 +187,22 @@
         padding-left: 1rem;
         padding-top: 0.5rem;
 }
+    .content{
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .gridItem{
+        height: 35vh;
+    }
+    .textContainer{
+        margin-bottom: 0.5rem;
+    }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

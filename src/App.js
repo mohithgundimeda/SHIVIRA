@@ -9,7 +9,7 @@ import Card from './Components/DCard';
 import SearchPage from './Components/SearchPage';
 import NotFound from './Components/NotFound';
 import Form from './Components/Form';
-
+import Itinerary from './Components/Itinerary';
 gsap.registerPlugin(ScrollTrigger);
 
 
@@ -40,6 +40,10 @@ const router = createBrowserRouter([
       {
         path:'/Form',
         element:<Form/>
+      },
+      {
+        path:'/:placeName-itinerary',
+        element:<Itinerary/>
       }
     ],
   },

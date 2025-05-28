@@ -7,7 +7,7 @@ import styles from "../Styles/SummerMobile.module.css";
 gsap.registerPlugin(ScrollTrigger);
 
 const CONFIG = {
-  PLACES: ["brazil", "leh", "monte", "nz", "yellowstone"],
+  PLACES: ["brazil", "ladakh", "monte_carlo", "new_zealand", "yellowstone"],
   SHOWING_PLACES: ["RIO DE JANEIRO", "LADAKH", "MONTE CARLO", "NEW ZEALAND", "YELLOWSTONE"],
   DAYS_NIGHTS: [
     [[4, 5], [7, 8]],
@@ -18,7 +18,7 @@ const CONFIG = {
   ],
   FORMATS: ["webp", "jpg"],
   LOGO_FALLBACK: "/static/logo4.png",
-  IMAGE_BASE_PATH: "/static/summer",
+  IMAGE_BASE_PATH: "/static/admin",
 };
 
 /**

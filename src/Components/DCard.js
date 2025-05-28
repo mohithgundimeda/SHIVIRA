@@ -193,6 +193,10 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
     navigate(`/Destinations/${destination.placeName}`, { state: cardProps });
   }, [navigate, finalProps.idx]);
 
+  const takeToBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
   // Handle image errors
   const handleImageError = useCallback(
     (e, imageSrc, imageDescription) => {
@@ -214,6 +218,18 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
     },
     [previewImageSrc, handleImageError]
   );
+
+  const handleBookNow = useCallback((destinationName) => {
+    if (!destinationName || typeof destinationName !== 'string') {
+      logError('Invalid destination name provided for booking');
+      return;
+    }
+    navigate('/Form', {
+      state: {
+        destination: destinationName.trim(),
+      },
+    });
+  }, [navigate]);
 
   // Lenis for smooth horizontal scrolling
   useEffect(() => {
@@ -369,6 +385,9 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
 
   return (
     <div className={styles.cardWrapper}>
+      <button ref={brandRef} className={styles.gettingBack} aria-label="Go Back" onClick={()=>takeToBack()}>
+        Go Back
+      </button>
       <div ref={brandRef} className={styles.brand} aria-label="SHIVIRA logo">
         SHIVIRA
       </div>
@@ -384,7 +403,7 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
               <button
                 className={styles.itinerary}
                 aria-label={`Book now for ${finalProps.placeName}`}
-                onClick={() => logError('Booking functionality not implemented')}
+                onClick={()=>handleBookNow(finalProps.placeName.toUpperCase())}
               >
                 BOOK NOW
               </button>

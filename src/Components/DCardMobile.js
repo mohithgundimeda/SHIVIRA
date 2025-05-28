@@ -154,6 +154,8 @@ const CardMobile = React.memo(({ countryName, regionName, placeName, images, idx
       return;
     }
 
+
+
     const sizes = ['small', 'medium', 'large'];
     const basePath = `/static/destinations/${obj.folder}`;
     const nextCardProps = {
@@ -172,6 +174,18 @@ const CardMobile = React.memo(({ countryName, regionName, placeName, images, idx
     };
     navigate(`/Destinations/${obj.placeName}`, { state: nextCardProps, replace: false });
   }, [navigate, finalProps.idx, finalProps.brandName]);
+
+    const handleBookNow = useCallback((destinationName) => {
+      if (!destinationName || typeof destinationName !== 'string') {
+        logError('Invalid destination name provided for booking');
+        return;
+      }
+      navigate('/Form', {
+        state: {
+          destination: destinationName.trim(),
+        },
+      });
+    }, [navigate]);
 
   // Handle image errors
   const handleImageError = useCallback(
@@ -269,8 +283,7 @@ const CardMobile = React.memo(({ countryName, regionName, placeName, images, idx
       <button
         className={styles.itinerary}
         aria-label={`Book now for ${finalProps.placeName}`}
-        disabled
-        onClick={() => logError('Booking functionality not implemented')}
+        onClick={() => handleBookNow(finalProps.placeName)}
       >
         BOOK NOW
       </button>
@@ -279,7 +292,7 @@ const CardMobile = React.memo(({ countryName, regionName, placeName, images, idx
         className={styles.next}
         role="button"
         aria-label={`Navigate to next location: ${nextDestination?.placeName || 'Next'}`}
-        onClick={takeToNext}
+        onClick={()=>takeToNext()}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

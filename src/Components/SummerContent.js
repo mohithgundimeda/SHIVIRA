@@ -18,16 +18,16 @@ export default function SummerContent({ contentRef, scrollDistance, svgDimension
 
   const placesData = useMemo(() => [
     { name: 'brazil', display: 'RIO DE JANEIRO' },
-    { name: 'leh', display: 'LADAKH' },
-    { name: 'monte', display: 'MONTE CARLO' },
-    { name: 'nz', display: 'NEW ZEALAND' },
+    { name: 'ladakh', display: 'LADAKH' },
+    { name: 'monte_carlo', display: 'MONTE CARLO' },
+    { name: 'new_zealand', display: 'NEW ZEALAND' },
     { name: 'yellowstone', display: 'YELLOWSTONE' },
   ], []);
 
   const groupedImages = useMemo(() => placesData.map(({ name }) => ({
     alt: name,
-    webp: `/static/summer/${name}/${name}-webp/${name}-webp-large/${name}1.webp`,
-    jpg: `/static/summer/${name}/${name}-jpg/${name}-jpg-large/${name}1.jpg`,
+    webp: `/static/admin/${name}/${name}-webp/${name}-webp-large/${name}1.webp`,
+    jpg: `/static/admin/${name}/${name}-jpg/${name}-jpg-large/${name}1.jpg`,
   })), [placesData]);
 
 useEffect(() => {

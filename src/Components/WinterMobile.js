@@ -17,7 +17,7 @@ const CONFIG = {
   ],
   FORMATS: ["webp", "jpg"],
   LOGO_FALLBACK: "/static/logo4.png",
-  IMAGE_BASE_PATH: "/static/winter",
+  IMAGE_BASE_PATH: "/static/admin",
 };
 
 /**

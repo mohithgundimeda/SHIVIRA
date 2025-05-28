@@ -23,6 +23,7 @@ import TextField from '@mui/material/TextField';
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide'; // Added for SlideTransition
 import {useIsMobile} from './useIsMobile.js';
+import { useLocation } from "react-router-dom";
 
 // Define SlideTransition function
 
@@ -63,8 +64,10 @@ const isValidEmailDomain = (email) => {
   return validDomains.some(domain => email.toLowerCase().endsWith(domain));
 };
 
-export default function Form({ destination = '' }) {
+export default function Form() {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const destination = location.state?.destination?.trim() || '';
 
   const vertical = isMobile? 'top':'bottom';
   const horizontal = isMobile? 'center':'left';

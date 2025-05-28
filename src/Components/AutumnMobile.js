@@ -7,7 +7,7 @@ import styles from "../Styles/AutumnMobile.module.css";
 gsap.registerPlugin(ScrollTrigger);
 
 const CONFIG = {
-  PLACES: ["lake bled", "bavaria", "ontario", "new england", "alsace"],
+  PLACES: ["lake_bled", "bavaria", "ontario", "new_england", "alsace"],
   SHOWING_PLACES: ["LAKE BLED", "BAVARIA", "ONTARIO", "NEW ENGLAND", "ALSACE"],
   DAYS_NIGHTS: [
     [[4, 5], [7, 8]],
@@ -18,7 +18,7 @@ const CONFIG = {
   ],
   FORMATS: ["webp", "jpg"],
   LOGO_FALLBACK: "/static/logo4.png",
-  IMAGE_BASE_PATH: "/static/autumn",
+  IMAGE_BASE_PATH: "/static/admin",
 };
 
 /**
@@ -196,7 +196,7 @@ const AutumnMobile = forwardRef(({ className }, ref)=>{
         tabIndex={0}
         aria-label={`View ${CONFIG.SHOWING_PLACES[index]} autumn package details`}
       >
-        <p className={styles.place}>{CONFIG.SHOWING_PLACES[index]}</p>
+        <p className={styles.place}>{CONFIG.SHOWING_PLACES[index].split('_').join(' ')}</p>
         <p className={styles.info} aria-live="polite">
           {`Packages typically range from ${CONFIG.DAYS_NIGHTS[index][0][0]}N / ${CONFIG.DAYS_NIGHTS[index][0][1]}D to ${CONFIG.DAYS_NIGHTS[index][1][0]}N / ${CONFIG.DAYS_NIGHTS[index][1][1]}D, click to see more`}
         </p>

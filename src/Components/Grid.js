@@ -143,7 +143,7 @@ const Grid = forwardRef((props, ref) => {
         return;
       }
 
-      const finalGridItems = isMobile ? gridItems.slice(0, 2) : gridItems.slice(0, 3);
+      const finalGridItems = isMobile ? gridItems.slice(0, 4) : gridItems.slice(0, 6);
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -299,8 +299,8 @@ const Grid = forwardRef((props, ref) => {
             {(!isImageLoaded || hasImageError) && (
               <Skeleton
                 variant="rectangular"
-                width="98%"
-                height="98%"
+                width="100%"
+                height="100%"
                 animation="wave"
                 sx={{ borderRadius: '10px', position: 'absolute', top: 0, left: 0 }}
               />

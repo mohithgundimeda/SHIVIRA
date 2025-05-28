@@ -8,14 +8,14 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Constants for configuration
 const PLACES_DATA = [
-  'lake bled',
+  'lake_bled',
   'bavaria',
   'ontario',
-  'new england',
+  'new_england',
   'alsace',
 ];
 
-const ASSET_PATH ='/static/autumn';
+const ASSET_PATH ='/static/admin';
 
 // Component
 const Autum = forwardRef(({...props}, ref)=>{
@@ -59,7 +59,7 @@ const Autum = forwardRef(({...props}, ref)=>{
         >
           {isColored && (
             <>
-              <p className={styles.panelText}>{placesData[placeIndex]}</p>
+              <p className={styles.panelText}>{placesData[placeIndex].split('_').join(' ')}</p>
               <p className={styles.seemore}>SEE MORE</p>
             </>
           )}

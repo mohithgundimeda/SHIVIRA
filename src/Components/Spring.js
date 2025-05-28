@@ -17,7 +17,7 @@ const CONFIG = {
   ],
   FORMATS: ["webp", "jpg"],
   FALLBACK_IMAGE: "/static/spring/fallback.jpg",
-  IMAGE_BASE_PATH: "/static/spring",
+  IMAGE_BASE_PATH: "/static/admin",
   BASE_PETALS: ["brownpetal", "whitepetal", "whitepetal2"],
   PETAL_COUNT: 20,
   PETAL_FALLBACK: "/static/logo2.png",
