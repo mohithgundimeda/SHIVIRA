@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import styles from '../Styles/DCard.module.css';
 import Lenis from 'lenis/dist/lenis';
@@ -11,6 +11,7 @@ import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import EmojiTransportationOutlinedIcon from '@mui/icons-material/EmojiTransportationOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
+import Skeleton from '@mui/material/Skeleton';
 
 // Constants centralized for easy maintenance
 const CONFIG = {
@@ -114,17 +115,62 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
   const isMobile = useIsMobile();
   const [previewImageSrc, setPreviewImageSrc] = useState(CONFIG.FALLBACK_IMAGE);
 
-  // Memoize final props
-  const finalProps = useMemo(() => {
-    const cardProps = location.state || {};
+ 
+const { placeName: paramPlace } = useParams();
+
+// Normalize URL parameter to match destinations
+const normalizedPlace = paramPlace
+  ? paramPlace.replace(/\s+/g, '_').toLowerCase()
+  : placeName.toLowerCase();
+
+// Find matching destination
+const destination = destinations.find(
+  (d) =>
+    d.folder.toLowerCase() === normalizedPlace ||
+    d.placeName.replace(/\s+/g, '_').toLowerCase() === normalizedPlace
+);
+
+const finalProps = useMemo(() => {
+  const cardProps = location.state || {};
+  if (cardProps.placeName) {
     return {
-      countryName: cardProps.countryName || countryName || 'Unknown Country',
-      regionName: cardProps.regionName || regionName || 'Unknown Region',
-      placeName: cardProps.placeName || placeName || 'Unknown Place',
-      images: cardProps.images || images || [],
+      countryName: cardProps.countryName || 'Unknown Country',
+      regionName: cardProps.regionName || 'Unknown Region',
+      placeName: cardProps.placeName || 'Unknown Place',
+      images: cardProps.images || [],
       idx: cardProps.idx !== undefined ? cardProps.idx : idx,
     };
-  }, [location.state, countryName, regionName, placeName, images, idx]);
+  }
+
+  if (!destination) {
+    logError(`No destination found for place: ${paramPlace}`);
+    return {
+      countryName: 'Unknown Country',
+      regionName: 'Unknown Region',
+      placeName: paramPlace || 'Unknown Place',
+      images: [],
+      idx: 0,
+    };
+  }
+
+  const sizes = ['small', 'medium', 'large'];
+  const basePath = `/static/destinations/${destination.folder}`;
+  const images = Array.from({ length: destination.imageCount || 0 }, (_, i) => {
+    const imageNum = i + 1;
+    return sizes.flatMap((size) => [
+      `${basePath}/${destination.folder}-webp/${destination.folder}-webp-${size}/${destination.folder}${imageNum}.webp`,
+      `${basePath}/${destination.folder}-jpg/${destination.folder}-jpg-${size}/${destination.folder}${imageNum}.jpg`,
+    ]);
+  }).flat();
+
+  return {
+    countryName: destination.countryName,
+    regionName: destination.regionName,
+    placeName: destination.placeName,
+    images,
+    idx: destinations.findIndex((d) => d.folder === destination.folder),
+  };
+}, [location.state, paramPlace, destination, idx]);
 
   // Memoize grouped images
   const groupedImages = useMemo(() => {
@@ -293,7 +339,6 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
       lenis.destroy();
       lenisRef.current = null;
       window.removeEventListener('resize', handleResize);
-      // handleResize.cancel();
       images.forEach((img) => observer.unobserve(img));
       observer.disconnect();
     };
@@ -362,19 +407,12 @@ const Card = React.memo(({ countryName, regionName, placeName, images, idx = 0 }
     };
   }, [isMobile, location.pathname, nextDestination]);
 
-  // Early returns for invalid cases
+  
   if (!groupedImages || groupedImages.length === 0) {
     return (
       <div className={styles.error} role="alert" aria-live="assertive">
-        No valid images provided
-      </div>
-    );
-  }
-
-  if (!location.state) {
-    return (
-      <div className={styles.error} role="alert" aria-live="assertive">
-        Invalid destination data. Please select a destination.
+        <Skeleton variant="rectangular" width="50%" height="95vh" animation="wave" />
+        <Skeleton variant="rectangular" width="50%" height="95vh" animation="wave" />
       </div>
     );
   }

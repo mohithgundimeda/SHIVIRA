@@ -14,12 +14,11 @@ import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 import TagsComponent from "./TagsComponent";
 import { useIsMobile } from './useIsMobile';
 import { debounce } from 'lodash';
-import { fetchPackages, fetchSuggestions, fetchPackagesByTags } from '../services/api';
+import { fetchItinerary, fetchPackages, fetchSuggestions, fetchPackagesByTags } from '../services/api';
 
 const CONFIG = {
-  API_BASE_URL: '/api',
   IMAGE_BASE_PATH: "/static/admin",
-  FORMATS: ["webp", "jpg"],
+  FORMATS: ["jpg"],
   SIZES: ["large", "medium"],
   DEBOUNCE_DELAY: 300,
 };
@@ -51,14 +50,12 @@ export default function SearchPage() {
   const mapPackagesWithImages = useCallback((data) => {
     return data.map(pkg => ({
       ...pkg,
-      images: CONFIG.SIZES.flatMap(size =>
-        CONFIG.FORMATS.map(format => ({
-          format,
-          size,
-          src: `${CONFIG.IMAGE_BASE_PATH}/${folderFriendly(pkg.package_name)}/${folderFriendly(pkg.package_name)}-${format}/${folderFriendly(pkg.package_name)}-${format}-${size}/${folderFriendly(pkg.package_name)}1.${format}`,
-          alt: pkg.package_name
-        }))
-      )
+      images: CONFIG.SIZES.map(size => ({
+        format: "jpg",
+        size,
+        src: `${CONFIG.IMAGE_BASE_PATH}/${folderFriendly(pkg.package_name)}/${folderFriendly(pkg.package_name)}-${size}/${folderFriendly(pkg.package_name)}1.jpg`,
+        alt: pkg.package_name
+      }))
     }));
   }, [folderFriendly]);
 
@@ -180,13 +177,29 @@ export default function SearchPage() {
     filterButtonRef.current?.focus();
   }, []);
 
-  const handleNavigate = useCallback((place) => {
-    if (!place || typeof place !== 'string') {
-      console.error('Invalid place name for navigation');
-      return;
+const handleNavigate = useCallback(async (place) => {
+  if (!place || typeof place !== 'string') {
+    console.error('Invalid place name provided for navigation');
+    return;
+  }
+
+  const abortController = new AbortController();
+  try {
+    const cleanedQuery = cleanQuery(place);
+    if (!cleanedQuery) {
+      throw new Error('Folder Name Cleaning Problem');
     }
-    navigate(`/${place}-itinerary`);
-  }, [navigate]);
+    const object = await fetchItinerary(cleanedQuery, abortController.signal);
+    navigate(`/${place}-itinerary`, { state: { itineraryData: object } });
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Failed to fetch itinerary:', err.message);
+      navigate(`/${place}-itinerary`, { state: { error: 'Failed to load itinerary data' } });
+    }
+  } finally {
+    abortController.abort();
+  }
+}, [navigate, cleanQuery]);
 
   const handleSearchChange = useCallback((event, value) => {
     setSearchText(value || '');

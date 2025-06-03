@@ -143,7 +143,7 @@ const Grid = forwardRef((props, ref) => {
         return;
       }
 
-      const finalGridItems = isMobile ? gridItems.slice(0, 4) : gridItems.slice(0, 6);
+      const finalGridItems = gridItems.slice(0, 6);
 
       const tl = gsap.timeline({
         scrollTrigger: {

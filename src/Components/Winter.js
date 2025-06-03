@@ -1,10 +1,10 @@
 import React, { useLayoutEffect, useEffect, useRef, useCallback, forwardRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import styles from "../Styles/Winter.module.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useNavigate } from "react-router-dom";
+import { fetchItinerary } from '../services/api.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,6 +21,10 @@ const CONFIG = {
   ],
 };
 
+const cleanQuery = (text) => {
+  return text?.replace('_', ' ').toLowerCase() || '';
+};
+
 const Winter = forwardRef(({ className, ...props }, ref) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,7 +39,7 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
   const locationRefs = useRef(CONFIG.PLACES.map(() => React.createRef()));
   const ctx = useRef(null);
 
-  // Validate data consistency
+  
   if (CONFIG.PLACES.length !== CONFIG.DAYS_NIGHTS.length) {
     console.error("[Winter] Mismatch between PLACES and DAYS_NIGHTS arrays");
   }
@@ -47,13 +51,11 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
     }
   }, [ref]);
 
-
   useEffect(() => {
     const timer = setTimeout(() => ScrollTrigger.refresh(), 100);
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
-  
   const handleMouseEnter = useCallback((index) => {
     if (!displayImageRef.current || !displayTextRef.current) {
       console.error("[Winter] Missing display refs");
@@ -66,30 +68,31 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
       return;
     }
 
-    const imagePath = `${CONFIG.IMAGE_BASE_PATH}/${place}/${place}-jpg/${place}-jpg-large/${place}1.jpg`;
+    const imagePath = `${CONFIG.IMAGE_BASE_PATH}/${place}/${place}-large/${place}1.jpg`;
     displayImageRef.current.src = imagePath;
     displayTextRef.current.textContent = `PACKAGES TYPICALLY RANGE FROM ${daysNights[0][0]}N / ${daysNights[0][1]}D TO ${daysNights[1][0]}N / ${daysNights[1][1]}D, CLICK TO SEE MORE.`;
   }, []);
 
-
   useEffect(() => {
-    const locations = locationRefs.current.map((ref) => ref.current).filter(Boolean);
-    if (locations.length === 0) {
-      console.warn("[Winter] No location refs found for event listeners");
-      return;
-    }
+  const locations = locationRefs.current.map((ref) => ref.current).filter(Boolean);
+  if (locations.length === 0) {
+    console.warn("[Winter] No location refs found for event listeners");
+    return;
+  }
 
+ 
+  const handlers = locations.map((_, index) => () => handleMouseEnter(index));
+
+  locations.forEach((location, index) => {
+    location.addEventListener("mouseenter", handlers[index]);
+  });
+
+  return () => {
     locations.forEach((location, index) => {
-      location.addEventListener("mouseenter", () => handleMouseEnter(index));
+      location.removeEventListener("mouseenter", handlers[index]);
     });
-
-    return () => {
-      locations.forEach((location, index) => {
-        location.removeEventListener("mouseenter", () => handleMouseEnter(index));
-      });
-    };
-  }, [handleMouseEnter]);
-
+  };
+}, [handleMouseEnter]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) {
@@ -100,7 +103,6 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
     ctx.current = gsap.context(() => {
       const mainTl = gsap.timeline();
 
-      
       if (sectionNameRef.current) {
         mainTl.from(sectionNameRef.current, {
           y: "100vh",
@@ -118,14 +120,13 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
         console.warn("[Winter] sectionNameRef missing");
       }
 
-      
       if (introRef.current && foreGroundRef.current && sectionNameRef.current && backGroundRef.current) {
         mainTl.add(
           gsap.timeline({
             scrollTrigger: {
               trigger: containerRef.current,
               start: "top top",
-              end:"200px",
+              end: "200px",
               scrub: 2,
               pin: true,
               pinSpacing: true,
@@ -137,26 +138,26 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
             },
           })
             .to(foreGroundRef.current, {
-                scale: 3,
-                y: "100",
-                duration: 5,
-              })
-              .to(sectionNameRef.current, {
+              scale: 3,
+              y: "100",
+              duration: 5,
+            })
+            .to(sectionNameRef.current, {
+              autoAlpha: 0,
+              duration: 2,
+            }, 0)
+            .to(foreGroundRef.current, {
+              autoAlpha: 0,
+              duration: 3,
+            }, "<+=2")
+            .to(
+              introRef.current,
+              {
                 autoAlpha: 0,
-                duration: 2,
-              }, 0)
-              .to(foreGroundRef.current, {
-                autoAlpha: 0,
-                duration: 3,
-              }, "<+=2")
-              .to(
-                introRef.current,
-                {
-                  autoAlpha: 0,
-                  duration: 1,
-                },
-                '<'
-              )
+                duration: 1,
+              },
+              '<'
+            )
         );
       } else {
         console.warn("[Winter] Missing refs for intro animation");
@@ -166,15 +167,31 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
     return () => ctx.current?.revert();
   }, []);
 
-  const handleClick = useCallback((place) => {
-      if (!place || typeof place !== 'string') {
-        console.error('Invalid place name provided for booking');
-        return;
-      }
-      navigate(`/${place}-itinerary`);
-    }, [navigate]);
+  const handleClick = useCallback(async (place) => {
+    if (!place || typeof place !== 'string') {
+      console.error('Invalid place name provided for booking');
+      return;
+    }
 
-  
+    const abortController = new AbortController();
+    try {
+      const cleanedQuery = cleanQuery(place);
+      if (!cleanedQuery) {
+        throw new Error('Folder Name Cleaning Problem');
+      }
+      const object = await fetchItinerary(cleanedQuery, abortController.signal);
+
+      navigate(`/${place}-itinerary`, { state: { itineraryData: object } });
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Failed to fetch itinerary:', err.message);
+        navigate(`/${place}-itinerary`, { state: { error: 'Failed to load itinerary data' } });
+      }
+    } finally {
+      abortController.abort();
+    }
+  }, [navigate]);
+
   const content = CONFIG.PLACES.map((place, index) => (
     <div key={place} className={styles.locationContainer}>
       <p
@@ -182,7 +199,7 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
         ref={locationRefs.current[index]}
         role="button"
         tabIndex={0}
-        onClick={()=>handleClick(place)}
+        onClick={() => handleClick(place)}
         aria-label={`View ${place} winter package details`}
       >
         {place}
@@ -237,7 +254,7 @@ const Winter = forwardRef(({ className, ...props }, ref) => {
       <div className={styles.display}>
         <div className={styles.displayImageContainer}>
           <img
-            src={`${CONFIG.IMAGE_BASE_PATH}/darjeeling/darjeeling-jpg/darjeeling-jpg-large/darjeeling1.jpg`}
+            src={`${CONFIG.IMAGE_BASE_PATH}/darjeeling/darjeeling-large/darjeeling1.jpg`}
             alt="Winter destination"
             className={styles.displayImage}
             ref={displayImageRef}

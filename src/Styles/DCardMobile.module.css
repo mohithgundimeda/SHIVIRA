@@ -174,14 +174,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-family: 'BebasNeue', sans-serif;
-  font-size: 1.5rem;
   background: #000;
-  text-shadow: 1px 1px 5px black;
   text-align: center;
   padding: 1rem;
   z-index: 200;

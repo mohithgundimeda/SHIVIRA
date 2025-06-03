@@ -1,23 +1,30 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo, useCallback} from "react";
 import styles from '../Styles/Summer.module.css';
 import gsap from "gsap";
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { fetchItinerary } from '../services/api.js';
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 
 const NUM_PACKAGES = 5;
+
+const cleanQuery = (text) => {
+  return text?.replace('_', ' ').toLowerCase() || '';
+};
 
 export default function SummerContent({ contentRef, scrollDistance, svgDimensions }) {
   const fenceBlockRef = useRef(Array(NUM_PACKAGES).fill().map(() => React.createRef(null)));
   const fenceContainerRef = useRef(null);
   const autumnRef = useRef(null);
   const titleRef = useRef(null);
+  const navigate = useNavigate();
   const leafRef = useRef(null);
   const prevSvgDimensions = useRef(svgDimensions);
 
   const placesData = useMemo(() => [
-    { name: 'brazil', display: 'RIO DE JANEIRO' },
+    { name: 'brazil', display: 'brazil' },
     { name: 'ladakh', display: 'LADAKH' },
     { name: 'monte_carlo', display: 'MONTE CARLO' },
     { name: 'new_zealand', display: 'NEW ZEALAND' },
@@ -26,8 +33,7 @@ export default function SummerContent({ contentRef, scrollDistance, svgDimension
 
   const groupedImages = useMemo(() => placesData.map(({ name }) => ({
     alt: name,
-    webp: `/static/admin/${name}/${name}-webp/${name}-webp-large/${name}1.webp`,
-    jpg: `/static/admin/${name}/${name}-jpg/${name}-jpg-large/${name}1.jpg`,
+    jpg: `/static/admin/${name}/${name}-large/${name}1.jpg`,
   })), [placesData]);
 
 useEffect(() => {
@@ -140,22 +146,44 @@ useEffect(() => {
   }
 }, [contentRef, scrollDistance, svgDimensions]);
 
+
+const handleNavigate = useCallback(async (place) => {
+  if (!place || typeof place !== 'string') {
+    console.error('Invalid place name provided for navigation');
+    return;
+  }
+
+  const abortController = new AbortController();
+  try {
+    const cleanedQuery = cleanQuery(place);
+    if (!cleanedQuery) {
+      throw new Error('Folder Name Cleaning Problem');
+    }
+    const object = await fetchItinerary(cleanedQuery, abortController.signal);
+    navigate(`/${place}-itinerary`, { state: { itineraryData: object } });
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Failed to fetch itinerary:', err.message);
+      navigate(`/${place}-itinerary`, { state: { error: 'Failed to load itinerary data' } });
+    }
+  } finally {
+    abortController.abort();
+  }
+}, [navigate]);
+
   const blocks = placesData.map(({ name, display }, index) => {
     const handleImageError = (e) => {
-      e.target.src = groupedImages[index].jpg;
-      console.log(`Switching to JPG: ${groupedImages[index].jpg}`);
-      e.target.onerror = () => {
         console.error(`Failed to load JPG: ${groupedImages[index].jpg}`);
         e.target.src = '/static/logo4.png';
         console.log(`Falling back to logo: /static/logo4.png`);
-      };
     };
 
     return (
-      <div key={name} ref={fenceBlockRef.current[index]} className={styles.fenceBlock}>
+      <div key={name} onClick={()=>handleNavigate(name)} ref={fenceBlockRef.current[index]} className={styles.fenceBlock}>
         <img
-          src={groupedImages[index].webp}
+          src={groupedImages[index].jpg}
           alt={groupedImages[index].alt}
+          
           className={styles.fenceImage}
           onError={handleImageError}
           loading="lazy"

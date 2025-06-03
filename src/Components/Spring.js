@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "../Styles/Spring.module.css";
+import { fetchItinerary } from '../services/api.js';
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,12 +17,16 @@ const CONFIG = {
     [[5, 6], [10, 11]],
     [[4, 5], [6, 7]],
   ],
-  FORMATS: ["webp", "jpg"],
+  FORMATS: ["jpg"],
   FALLBACK_IMAGE: "/static/spring/fallback.jpg",
   IMAGE_BASE_PATH: "/static/admin",
   BASE_PETALS: ["brownpetal", "whitepetal", "whitepetal2"],
   PETAL_COUNT: 20,
   PETAL_FALLBACK: "/static/logo2.png",
+};
+
+const cleanQuery = (text) => {
+  return text?.replace('_', ' ').toLowerCase() || '';
 };
 
 const Spring = forwardRef(({ className, summer, ...props }, ref) => {
@@ -38,6 +44,7 @@ const Spring = forwardRef(({ className, summer, ...props }, ref) => {
   const loadedImagesRef = useRef(0);
   const hasAppliedTransformsRef = useRef(false);
   const hasAnimatedPetalsRef = useRef(false);
+  const navigate  = useNavigate();
   const itemRefs = useRef(
     CONFIG.PLACES.map(() => ({ info: React.createRef(), image: React.createRef() }))
   );
@@ -306,18 +313,43 @@ const Spring = forwardRef(({ className, summer, ...props }, ref) => {
   const groupedImages = CONFIG.PLACES.map((name) => {
     const placeObj = { alt: name };
     CONFIG.FORMATS.forEach((form) => {
-      placeObj[form] = `${CONFIG.IMAGE_BASE_PATH}/${name}/${name}-${form}/${name}-${form}-large/${name}1.${form}`;
+      placeObj[form] = `${CONFIG.IMAGE_BASE_PATH}/${name}/${name}-large/${name}1.${form}`;
     });
     return placeObj;
   });
 
-  // Generate grid content
+  const handleNavigate = useCallback(async (place) => {
+    if (!place || typeof place !== 'string') {
+      console.error('Invalid place name provided for navigation');
+      return;
+    }
+
+    const abortController = new AbortController();
+    try {
+      const cleanedQuery = cleanQuery(place);
+      if (!cleanedQuery) {
+        throw new Error('Folder Name Cleaning Problem');
+      }
+      const object = await fetchItinerary(cleanedQuery, abortController.signal);
+      navigate(`/${place}-itinerary`, { state: { itineraryData: object } });
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Failed to fetch itinerary:', err.message);
+        navigate(`/${place}-itinerary`, { state: { error: 'Failed to load itinerary data' } });
+      }
+    } finally {
+      abortController.abort();
+    }
+  }, [navigate]);
+
+  
   const content = CONFIG.PLACES.map((place, index) => (
     <React.Fragment key={place}>
       <div
         ref={itemRefs.current[index].info}
         className={styles.imageinfo}
         role="button"
+        onClick={()=>handleNavigate(place)}
         tabIndex={0}
         aria-label={`View ${place} spring package details`}
       >
@@ -328,7 +360,7 @@ const Spring = forwardRef(({ className, summer, ...props }, ref) => {
       </div>
       <div ref={itemRefs.current[index].image} className={styles.imageContainer}>
         <picture>
-          <source srcSet={groupedImages[index].webp} type="image/webp" />
+          <source srcSet={groupedImages[index].jpg} type="image/jpg" />
           <img
             src={groupedImages[index].jpg}
             alt={`Spring destination in ${place}`}

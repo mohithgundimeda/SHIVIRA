@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "../Styles/SummerMobile.module.css";
+import { useNavigate } from "react-router-dom";
+import { fetchItinerary } from '../services/api.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,9 +18,13 @@ const CONFIG = {
     [[6, 7], [10, 11]],
     [[4, 5], [7, 8]],
   ],
-  FORMATS: ["webp", "jpg"],
+  FORMATS: ["jpg"],
   LOGO_FALLBACK: "/static/logo4.png",
   IMAGE_BASE_PATH: "/static/admin",
+};
+
+const cleanQuery = (text) => {
+  return text?.replace('_', ' ').toLowerCase() || '';
 };
 
 /**
@@ -31,6 +37,7 @@ const SummerMobile = forwardRef(({ className }, ref)=>{
   const textRef = useRef(null);
   const gridRef = useRef(null);
   const containerRef = useRef(null);
+  const navigate = useNavigate();
   const itemRefs = useRef(
     CONFIG.PLACES.map(() => ({ info: React.createRef(), image: React.createRef() }))
   );
@@ -50,23 +57,20 @@ const SummerMobile = forwardRef(({ className }, ref)=>{
     return CONFIG.PLACES.map((name) => {
     const placeObj = { alt: name };
     CONFIG.FORMATS.forEach((form) => {
-      placeObj[form] = `${CONFIG.IMAGE_BASE_PATH}/${name}/${name}-${form}/${name}-${form}-medium/${name}1.${form}`;
+      placeObj[form] = `${CONFIG.IMAGE_BASE_PATH}/${name}/${name}-medium/${name}1.${form}`;
     });
     return placeObj;
   })
   },[]);
 
   // Handle image errors
-  const handleImageError = useCallback((e, index) => {
-    const jpgPath = groupedImages[index].jpg;
-    e.target.src = jpgPath;
-    console.warn(`[SummerMobile] Switching to JPG: ${jpgPath}`);
-    e.target.onerror = () => {
-      console.error(`[SummerMobile] Failed to load JPG: ${jpgPath}`);
+  const handleImageError = useCallback((e) => {
+    
+      console.error(`[SummerMobile] Failed to load JPG`);
       e.target.src = CONFIG.LOGO_FALLBACK;
       console.warn(`[SummerMobile] Falling back to logo: ${CONFIG.LOGO_FALLBACK}`);
-    };
-  }, [groupedImages]);
+
+  }, []);
 
   // Animate text characters
   const animateText = useCallback((chars) => {
@@ -183,6 +187,30 @@ const SummerMobile = forwardRef(({ className }, ref)=>{
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
+  const handleNavigate = useCallback(async (place) => {
+  if (!place || typeof place !== 'string') {
+    console.error('Invalid place name provided for navigation');
+    return;
+  }
+
+  const abortController = new AbortController();
+  try {
+    const cleanedQuery = cleanQuery(place);
+    if (!cleanedQuery) {
+      throw new Error('Folder Name Cleaning Problem');
+    }
+    const object = await fetchItinerary(cleanedQuery, abortController.signal);
+    navigate(`/${place}-itinerary`, { state: { itineraryData: object } });
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Failed to fetch itinerary:', err.message);
+      navigate(`/${place}-itinerary`, { state: { error: 'Failed to load itinerary data' } });
+    }
+  } finally {
+    abortController.abort();
+  }
+}, [navigate]);
+
   // Generate content
   const content = CONFIG.PLACES.map((place, index) => (
     <React.Fragment key={place}>
@@ -190,6 +218,7 @@ const SummerMobile = forwardRef(({ className }, ref)=>{
         ref={itemRefs.current[index].info}
         className={styles.imageinfo}
         role="button"
+        onClick={()=>handleNavigate(place)}
         tabIndex={0}
         aria-label={`View ${CONFIG.SHOWING_PLACES[index]} summer package details`}
       >
@@ -200,13 +229,13 @@ const SummerMobile = forwardRef(({ className }, ref)=>{
       </div>
       <div ref={itemRefs.current[index].image} className={styles.imageContainer}>
         <img
-          src={groupedImages[index].webp}
+          src={groupedImages[index].jpg}
           alt={groupedImages[index].alt}
           className={styles.image}
           loading={index === 0 ? "eager" : "lazy"}
           fetchPriority={index === 0 ? "high" : "auto"}
           decoding="async"
-          onError={(e) => handleImageError(e, index)}
+          onError={(e) => handleImageError(e)}
         />
       </div>
     </React.Fragment>

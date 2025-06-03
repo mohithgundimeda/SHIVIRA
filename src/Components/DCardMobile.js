@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import styles from '../Styles/DCardMobile.module.css';
 import destinationsData from './DestinationsData';
@@ -9,7 +9,7 @@ import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import EmojiTransportationOutlinedIcon from '@mui/icons-material/EmojiTransportationOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 
-const destinations = destinationsData.slice(0, 14);
+const destinations = destinationsData.slice(0,14);
 
 // Constants centralized for easy maintenance
 const CONFIG = {
@@ -91,18 +91,83 @@ const CardMobile = React.memo(({ countryName, regionName, placeName, images, idx
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
 
-  // Memoize final props
-  const finalProps = useMemo(() => {
-    const cardProps = location.state || {};
-    return {
-      countryName: cardProps.countryName || countryName || 'Unknown Country',
-      regionName: cardProps.regionName || regionName || 'Unknown Region',
-      placeName: cardProps.placeName || placeName || 'Unknown Place',
-      images: cardProps.images || images || [],
-      idx: cardProps.idx != null ? cardProps.idx : idx,
-      brandName: cardProps.brandName || brandName,
-    };
-  }, [location.state, countryName, regionName, placeName, images, idx, brandName]);
+  
+    // Extract placeName from URL
+    const { placeName: paramPlace } = useParams();
+
+    // Normalize URL parameter to match destinations
+    const normalizedPlace = paramPlace
+      ? paramPlace.replace(/\s+/g, '_').toLowerCase()
+      : placeName.toLowerCase();
+
+    // Find matching destination
+    const destination = destinations.find(
+      (d) =>
+        d.folder.toLowerCase() === normalizedPlace ||
+        d.placeName.replace(/\s+/g, '_').toLowerCase() === normalizedPlace
+    );
+
+    const finalProps = useMemo(() => {
+      const cardProps = location.state || {};
+      // Use props from Card.js if valid (non-default)
+      if (cardProps.placeName || (countryName && countryName !== 'Unknown Country' && images?.length > 0)) {
+        const selectedDestination = destinations.find(
+          (d) =>
+            d.placeName.toLowerCase() === (cardProps.placeName || placeName).toLowerCase() ||
+            d.folder.toLowerCase() === (cardProps.placeName || placeName).replace(/\s+/g, '_').toLowerCase()
+        );
+        if (!selectedDestination) {
+          logError(`Destination not in mobile's 14 destinations: ${cardProps.placeName || placeName}`);
+          return {
+            countryName: 'Unknown Country',
+            regionName: 'Unknown Region',
+            placeName: cardProps.placeName || placeName || 'Unknown Place',
+            images: [],
+            idx: 0,
+            brandName: cardProps.brandName || brandName,
+          };
+        }
+        return {
+          countryName: cardProps.countryName || countryName || 'Unknown Country',
+          regionName: cardProps.regionName || regionName || 'Unknown Region',
+          placeName: cardProps.placeName || placeName || 'Unknown Place',
+          images: cardProps.images || images || [],
+          idx: cardProps.idx != null ? cardProps.idx : idx,
+          brandName: cardProps.brandName || brandName,
+        };
+      }
+
+      if (!destination) {
+        logError(`No destination found for place: ${paramPlace}`);
+        return {
+          countryName: 'Unknown Country',
+          regionName: 'Unknown Region',
+          placeName: paramPlace || 'Unknown Place',
+          images: [],
+          idx: 0,
+          brandName,
+        };
+      }
+
+      const sizes = ['small', 'medium', 'large'];
+      const basePath = `/static/destinations/${destination.folder}`;
+      const generatedImages = Array.from({ length: destination.imageCount || 0 }, (_, i) => {
+        const imageNum = i + 1;
+        return sizes.flatMap((size) => [
+          `${basePath}/${destination.folder}-webp/${destination.folder}-webp-${size}/${destination.folder}${imageNum}.webp`,
+          `${basePath}/${destination.folder}-jpg/${destination.folder}-jpg-${size}/${destination.folder}${imageNum}.jpg`,
+        ]);
+      }).flat();
+
+      return {
+        countryName: destination.countryName,
+        regionName: destination.regionName,
+        placeName: destination.placeName,
+        images: generatedImages,
+        idx: destinations.findIndex((d) => d.folder === destination.folder),
+        brandName,
+      };
+    }, [location.state, paramPlace, destination, countryName, regionName, placeName, images, idx, brandName]);
 
   // Memoize grouped images
   const groupedImages = useMemo(() => {
@@ -262,15 +327,7 @@ const CardMobile = React.memo(({ countryName, regionName, placeName, images, idx
   if (!groupedImages || groupedImages.length === 0) {
     return (
       <div className={styles.error} role="alert" aria-live="assertive">
-        No valid images provided
-      </div>
-    );
-  }
-
-  if (!location.state) {
-    return (
-      <div className={styles.error} role="alert" aria-live="assertive">
-        Invalid destination data. Please select a destination.
+        Invalid destination data. Please select a valid destination.
       </div>
     );
   }

@@ -1,4 +1,5 @@
-https:codepen.io/GreenSock/details/bGPBpeY
-remove scroll for DMT
-after creating database use fetch to get relavent destination is Winter.js using showcase and other columns
 remember to use s3 for images no leaving in the directory
+
+create a table to store image paths
+
+get ssl certificate

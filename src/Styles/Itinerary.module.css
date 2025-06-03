@@ -1,15 +1,359 @@
+@font-face {
+  font-family: "Quicksand";
+  src:url("/public/fonts/Quicksand/Quicksand-Regular.ttf") format("truetype") ;
+  font-display: swap; 
+  font-weight: normal; 
+  font-style: normal; 
+}
+
 .container{
     width:100vw;
     height: auto;
-    min-height: 100vh;
+    font-family:'Quicksand', sans-serif;
     background-color: #DCD9D4;
     background-image: linear-gradient(to bottom, rgba(255,255,255,0.50) 0%, rgba(0,0,0,0.50) 100%), radial-gradient(at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.50) 50%);
     background-blend-mode: soft-light,screen;
-    overflow: hidden;
     opacity: 0;
     animation: fadeIn 0.5s ease-in-out forwards;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
+.header{
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 2rem;
+    gap: 1.5rem;
+}
+.headerMain{
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.siders{
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+}
+.shareButton{
+    background: none;
+    border: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-size: clamp(0.6rem, 0.514rem + 0.429vw, 0.9rem);
+    font-family: "Quicksand", sans-serif;
+
+}
+.packageName{
+    position: relative;
+    font-size: clamp(1.3rem, 1.243rem + 0.286vw, 1.5rem);
+    cursor: default;
+    text-transform: uppercase;
+}
+
+.packageInfo{
+    position: relative;
+    width: 100%;
+    text-transform: uppercase;
+    display: flex;
+    flex-wrap: wrap;
+    cursor: default;
+    font-size: clamp(0.6rem, 0.514rem + 0.429vw, 0.9rem);
+    gap:2rem;
+}
+.mobileCost{
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: end;
+}
+.costDisplay{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.oldCost{
+    position: relative;
+    font-size: clamp(0.8rem, 0.658rem + 0.711vw, 1rem);
+    font-family: "Quicksand", sans-serif;
+    text-decoration:line-through;
+}
+
+.newCost{
+    position: relative;
+    font-size:clamp(0.8rem, 0.658rem + 0.711vw, 1rem);
+    font-family: "Quicksand", sans-serif;
+}
+
+.imageContainer{
+    position: relative;
+    background-color: #cbc9c76b;
+    margin-top: 1rem;
+    padding: 1.5rem;
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.square{
+    position: relative;
+    width: 70%;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    grid-template-columns: repeat(2, 1fr);
+    overflow: hidden;
+    gap: 0.2rem;
+}
+.block{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 2/1;
+    overflow: hidden;
+}
+.image{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    object-fit: cover;
+    object-position: center;
+}
+.ItineraryContainer{
+    position: relative;
+    width: 100vw;
+    height: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+.tabsContainer {
+  position: relative;
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.costAndInclusions{
+    position: relative;
+    width: 20%;
+    height: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(5rem, 2.701rem + 4.776vw, 7rem);
+    padding: 1rem;
+}
+
+.startingFrom{
+    position: relative;
+    font-size: clamp(0.7rem, 0.413rem + 0.597vw, 0.95rem);
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    font-family: "Quicksand", sans-serif;
+    text-transform: uppercase;
+}
+
+.costContainerDesktop{
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1rem, -0.149rem + 2.388vw, 2rem);
+}
+.oldCostDesktop{
+    position: relative;
+    font-size: clamp(1.2rem, 0.855rem + 0.716vw, 1.5rem);
+    font-family: "Quicksand", sans-serif;
+    text-decoration:line-through;
+}
+.rowFlex{
+    position: relative;
+    width: 100%;
+    display: flex;
+    gap: clamp(0.2rem, -0.03rem + 0.478vw, 0.4rem);
+    justify-content: center;
+    align-items: center;
+}
+.newCostDesktop{
+    position: relative;
+    font-size:clamp(1.2rem, 0.855rem + 0.716vw, 1.5rem);
+    font-family: "Quicksand", sans-serif;
+}
+.perPerson{
+    text-transform: uppercase;
+    font-size: clamp(0.6rem, 0.37rem + 0.478vw, 0.8rem);
+}
+
+.inclusionsFlex{
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.inclusionHeading{
+    text-transform: uppercase;
+    font-size: clamp(0.9rem, 0.67rem + 0.478vw, 1.1rem);
+    box-sizing: border-box;
+}
+.inclusionsContainer{
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+.inclusion{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.icon{
+    font-size: clamp(1.4rem, 1.055rem + 0.716vw, 1.7rem) !important;
+}
+.iconText{
+    font-size: clamp(0.4rem, 0.055rem + 0.716vw, 0.7rem);
+    text-transform: uppercase;
+}
+
+.overviewContainer{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    text-transform: uppercase;
+    font-family: 'Quicksand', sans-serif;
+    padding: 1rem;
+    font-size: clamp(0.8rem, 0.57rem + 0.478vw, 1rem);
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+}
+
+.highlightsSection{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+}
+
+.dayDataContainer{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.dayPanel {
+  font-size: clamp(0.8rem, 0.57rem + 0.478vw, 1rem);
+}
+
+.dayActivity {
+  font-size: clamp(0.7rem, 0.47rem + 0.478vw, 0.9rem);
+  color: #333333;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.inExContainer{
+    position: relative;
+    width: 100%;
+    min-height: max-content;
+    overflow: hidden;
+}
+.listContainer {
+  padding: 1rem;
+  gap: 2rem;
+  height: auto;
+}
+
+.listHeading {
+  font-size: clamp(1rem, 0.77rem + 0.478vw, 1.2rem) !important;
+  text-transform: uppercase;
+  font-family: 'Quicksand', sans-serif !important;
+  color: #333333 !important;
+  margin-bottom: 1rem;
+}
+
+.tacContainer{
+    position: relative;
+    font-family: 'Quicksand', sans-serif;
+    width: 100%;
+    overflow: hidden;
+    padding: 1rem;
+}
+.list{
+    text-decoration: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: start;
+    gap: 1rem;
+    text-transform: uppercase;
+    list-style-type:square;
+}
+
+:global(.ant-list .ant-list-item .ant-list-item-meta .ant-list-item-meta-description) {
+  font-size: clamp(0.8rem, 0.771rem + 0.143vw, 0.9rem) !important;
+  color: black !important;
+  font-family: 'Quicksand', sans-serif !important;
+  text-transform: uppercase !important;
+  padding-bottom: 0.5rem;
+}
+
+
+:global(.ant-avatar) {
+  width: 24px;
+  height: 24px;
+}
+
+:global(.ant-tabs-ink-bar) {
+  background-color: black !important;
+}
+
+:global(.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn) {
+      color: grey !important;
+}
+:global(.ant-tabs-tab-btn:hover){
+    color: black !important;
+}
+:global(.ant-tabs-tab:hover) {
+  color: black !important;
+}
+
+:global(.ant-tabs-tab.ant-tabs-tab-active) {
+  color: grey !important;
+}
 
 @keyframes fadeIn {
     from {
@@ -18,4 +362,26 @@
     to {
         opacity: 1;
     }
+}
+
+
+@media(max-width:770px) {
+   
+    .header{
+        padding: 1rem;
+    }
+    .packageInfo{
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+    .square{
+        width: 90%;
+    }
+    .block{
+        aspect-ratio: 4 / 3;
+    }
+    .tabsContainer{
+        padding: 0.5rem;
+    }
+    
 }
